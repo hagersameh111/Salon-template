@@ -6,12 +6,38 @@ import { useTranslation } from "react-i18next"
 import "./hero-responsive.css"
 import MobileHero from "./MobileHero"
 
-const Hero = () => {
+const Hero = ({ editMode }) => {
   const [current, setCurrent] = useState(0)
   const heroSlides = brand.data.heroSlides
   const { t, i18n } = useTranslation()
+
+  // State that holds editable content instead of using t() directly
+const [heroData, setHeroData] = useState(() => {
+  const saved = localStorage.getItem("heroData")
+
+  // لو في بيانات محفوظة → استخدمها
+  if (saved) {
+    return JSON.parse(saved)
+  }
+
+  // غير كده → default من الترجمة
+  return {
+    title: t("hero.title"),
+    description: t("hero.description"),
+    button: t("hero.button"),
+  }
+})
+
+useEffect(() => {
+  localStorage.setItem("heroData", JSON.stringify(heroData))
+}, [heroData])
+
+  // Controls opening/closing the editor panel
+  const [openEditor, setOpenEditor] = useState(false)
+
   const isRTL = i18n.language === "ar"
 
+  // Slider logic (unchanged)
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % heroSlides.length)
@@ -29,6 +55,16 @@ const Hero = () => {
       <section
         className={`hidden lg:block relative bg-[var(--color-bg-main)] overflow-hidden ${isRTL ? "hero-force-ltr" : ""}`}
       >
+        {/* EDIT BUTTON (only appears in edit mode) */}
+        {editMode && (
+          <button
+            onClick={() => setOpenEditor(true)}
+            className="absolute top-4 left-4 bg-white px-3 py-1 rounded shadow text-sm z-20"
+          >
+            ✏ Edit
+          </button>
+        )}
+
         <div
           className="absolute inset-0 bg-repeat bg-[length:511px] opacity-[1] pointer-events-none"
           style={{ backgroundImage: "url('/overlay.svg')" }}
@@ -44,12 +80,14 @@ const Hero = () => {
                   isRTL ? "hero-ar" : ""
                 }`}
               >
+                {/* ❌ You were using t("heroData.title") (wrong)
+                   ✅ Now using editable state */}
                 <h1 className="font-semibold text-4xl lg:text-[56px] xl:text-[68px] leading-[1.05] text-[var(--color-accent)] whitespace-pre-line mb-4">
-                  {t("hero.title")}
+                  {heroData.title}
                 </h1>
 
                 <p className="font-extralight text-base lg:text-xl xl:text-[24px] text-[var(--color-text-main)] max-w-[760px] mx-auto lg:mx-0 mb-8">
-                  {t("hero.description")}
+                  {heroData.description}
                 </p>
 
                 <div className="inline-flex flex-col items-stretch w-fit">
@@ -62,7 +100,9 @@ const Hero = () => {
                     <Button className="w-full">
                       <div className="flex items-center gap-3 justify-center">
                         <img src="/calendar.svg" className="w-5 h-5" />
-                        {t("hero.button")}
+
+                        {/* ✅ Editable button text */}
+                        {heroData.button}
                       </div>
                     </Button>
                   </a>
@@ -148,6 +188,50 @@ const Hero = () => {
           </Container>
         </div>
       </section>
+
+      {/* EDITOR PANEL */}
+      {openEditor && (
+        <div className="fixed top-0 right-0 w-[320px] h-full bg-white shadow-xl z-[9999] p-4">
+
+          <h2 className="font-semibold mb-4">Edit Hero</h2>
+
+          {/* Title input */}
+          <input
+            value={heroData.title}
+            onChange={(e) =>
+              setHeroData({ ...heroData, title: e.target.value })
+            }
+            className="w-full border p-2 mb-3"
+          />
+
+          {/* Description input */}
+          <textarea
+            value={heroData.description}
+            onChange={(e) =>
+              setHeroData({ ...heroData, description: e.target.value })
+            }
+            className="w-full border p-2 mb-3"
+          />
+
+          {/* Button text */}
+          <input
+            value={heroData.button}
+            onChange={(e) =>
+              setHeroData({ ...heroData, button: e.target.value })
+            }
+            className="w-full border p-2 mb-3"
+          />
+
+          {/* Close panel */}
+          <button
+            onClick={() => setOpenEditor(false)}
+            className="bg-pink-500 text-white px-4 py-2 rounded w-full"
+          >
+            Save
+          </button>
+
+        </div>
+      )}
     </>
   )
 }

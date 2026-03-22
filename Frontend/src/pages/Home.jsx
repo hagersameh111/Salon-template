@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, useState } from "react"
 import { motion } from "framer-motion"
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
@@ -26,52 +26,92 @@ const AnimatedSection = ({ children, delay = 0 }) => (
 )
 
 const Home = () => {
+  const [editMode, setEditMode] = useState(false)
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-
-      <main className="flex-1">
-        <Suspense fallback={<div className="min-h-[60vh]" />}>
-          <div id="hero">
-            <AnimatedSection>
-              <Hero />
-            </AnimatedSection>
+    <>
+    <button
+  onClick={() => setEditMode(true)}
+  className="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded z-[9999]"
+>
+  Fake Login
+</button>
+      {/* Edit Mode Bar */}
+      {editMode && (
+        <div className="fixed top-0 left-0 w-full h-[60px] bg-white shadow z-[9999] flex items-center justify-between px-6">
+          
+          <div className="font-semibold">
+            Edit Mode
           </div>
 
-          <AnimatedSection delay={0.03}>
-            <TrustBar />
-          </AnimatedSection>
+          <div className="flex gap-4 items-center">
+            <button className="text-sm">Theme</button>
+            <button className="text-sm">Preview</button>
 
-          <AnimatedSection delay={0.05}>
-            <WhyChoose />
-          </AnimatedSection>
+            <button className="bg-pink-500 text-white px-4 py-1 rounded">
+              Save
+            </button>
 
-          <div id="services">
-            <AnimatedSection delay={0.07}>
-              <Services />
-            </AnimatedSection>
+            <button
+              onClick={() => setEditMode(false)}
+              className="text-sm"
+            >
+              Exit
+            </button>
           </div>
 
-          <AnimatedSection delay={0.09}>
-            <GallerySection />
-          </AnimatedSection>
+        </div>
+      )}
 
-          <AnimatedSection delay={0.11}>
-            <AboutSection />
-          </AnimatedSection>
+      {/*site content*/}
+      <div className={`min-h-screen flex flex-col ${editMode ? "pt-[60px]" : ""}`}>
+        <Navbar />
 
-          <AnimatedSection delay={0.13}>
-            <Reviews />
-          </AnimatedSection>
+        <main className="flex-1">
+          <Suspense fallback={<div className="min-h-[60vh]" />}>
+            
+            <div id="hero">
+              <AnimatedSection>
+                <Hero editMode={editMode}/>
+              </AnimatedSection>
+            </div>
 
-          <AnimatedSection delay={0.15}>
-            <VisitSection />
-          </AnimatedSection>
-        </Suspense>
-      </main>
+            <AnimatedSection delay={0.03}>
+              <TrustBar />
+            </AnimatedSection>
 
-      <Footer />
-    </div>
+            <AnimatedSection delay={0.05}>
+              <WhyChoose />
+            </AnimatedSection>
+
+            <div id="services">
+              <AnimatedSection delay={0.07}>
+                <Services />
+              </AnimatedSection>
+            </div>
+
+            <AnimatedSection delay={0.09}>
+              <GallerySection />
+            </AnimatedSection>
+
+            <AnimatedSection delay={0.11}>
+              <AboutSection />
+            </AnimatedSection>
+
+            <AnimatedSection delay={0.13}>
+              <Reviews />
+            </AnimatedSection>
+
+            <AnimatedSection delay={0.15}>
+              <VisitSection />
+            </AnimatedSection>
+
+          </Suspense>
+        </main>
+
+        <Footer />
+      </div>
+    </>
   )
 }
 
