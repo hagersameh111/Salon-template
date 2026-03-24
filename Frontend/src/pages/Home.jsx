@@ -26,7 +26,14 @@ const AnimatedSection = ({ children, delay = 0 }) => (
 )
 
 const Home = () => {
-  const [editMode, setEditMode] = useState(false)
+const [editMode, setEditMode] = useState(false)
+const [editingSection, setEditingSection] = useState(null)
+// GLOBAL STATE for Hero (temporary step)
+const [heroData, setHeroData] = useState({
+  title: "Default Title",
+  description: "Default Description",
+  button: "Book Now",
+})
 
   return (
     <>
@@ -62,6 +69,58 @@ const Home = () => {
 
         </div>
       )}
+      {/* Hero Edit Panel */}
+      {editingSection === "hero" && (
+  <div className="fixed top-0 right-0 w-[320px] h-full bg-white shadow-xl z-[9999] p-4">
+
+    <h2 className="font-semibold mb-4">Edit Hero</h2>
+
+    {/* Title */}
+    <input
+      value={heroData.title}
+      onChange={(e) =>
+        setHeroData({
+          ...heroData,
+          title: e.target.value,
+        })
+      }
+      className="w-full border p-2 mb-3"
+    />
+
+    {/* Description */}
+    <textarea
+      value={heroData.description}
+      onChange={(e) =>
+        setHeroData({
+          ...heroData,
+          description: e.target.value,
+        })
+      }
+      className="w-full border p-2 mb-3"
+    />
+
+    {/* Button */}
+    <input
+      value={heroData.button}
+      onChange={(e) =>
+        setHeroData({
+          ...heroData,
+          button: e.target.value,
+        })
+      }
+      className="w-full border p-2 mb-3"
+    />
+
+    {/* Close */}
+    <button
+      onClick={() => setEditingSection(null)}
+      className="bg-pink-500 text-white px-4 py-2 rounded w-full"
+    >
+      Save
+    </button>
+
+  </div>
+)}
 
       {/*site content*/}
       <div className={`min-h-screen flex flex-col ${editMode ? "pt-[60px]" : ""}`}>
@@ -72,7 +131,7 @@ const Home = () => {
             
             <div id="hero">
               <AnimatedSection>
-                <Hero editMode={editMode}/>
+                <Hero editMode={editMode} heroData={heroData} onEdit={setEditingSection} />
               </AnimatedSection>
             </div>
 
