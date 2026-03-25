@@ -28,11 +28,36 @@ const AnimatedSection = ({ children, delay = 0 }) => (
 const Home = () => {
 const [editMode, setEditMode] = useState(false)
 const [editingSection, setEditingSection] = useState(null)
+
 // GLOBAL STATE for Hero (temporary step)
 const [heroData, setHeroData] = useState({
   title: "Default Title",
   description: "Default Description",
   button: "Book Now",
+})
+// GLOBAL STATE for WhyChoose (temporary step)
+const whyChooseTemplates = [
+  "/why-full.jpg",
+  "/facial2.jpg",
+  "/nails.jpg",
+]
+const [whyChooseData, setWhyChooseData] = useState({
+  title: "Why Choose SŌRA?",
+  subtitle: "A personalized skincare experience focused on real, lasting results.",
+  image: "/why-full.jpg", // ✅ NEW
+  features: [
+
+    {
+      id: "hijabFriendly",
+      title: "Hijab-Friendly",
+      desc: "Only female staff and no CCTV for your privacy",
+    },
+    {
+      id: "customized",
+      title: "Customized Treatments",
+      desc: "Every facial is tailored to your unique skin needs and goals.",
+    },
+  ],
 })
 
   return (
@@ -69,6 +94,7 @@ const [heroData, setHeroData] = useState({
 
         </div>
       )}
+
       {/* Hero Edit Panel */}
       {editingSection === "hero" && (
   <div className="fixed top-0 right-0 w-[320px] h-full bg-white shadow-xl z-[9999] p-4">
@@ -122,6 +148,177 @@ const [heroData, setHeroData] = useState({
   </div>
 )}
 
+{/* WhyChoose Edit Panel */}
+{editingSection === "whyChoose" && (
+  <div className="fixed top-0 right-0 w-[320px] h-full bg-white shadow-xl z-[9999] p-4 overflow-y-auto pb-20">
+
+    <h2 className="font-semibold mb-4">Edit Why Choose</h2>
+
+    {/* Title Input */}
+    <input
+      value={whyChooseData.title}
+      onChange={(e) =>
+        setWhyChooseData({
+          ...whyChooseData,
+          title: e.target.value,
+        })
+      }
+      className="w-full border p-2 mb-3"
+    />
+
+    {/* Subtitle Input */}
+    <textarea
+      value={whyChooseData.subtitle}
+      onChange={(e) =>
+        setWhyChooseData({
+          ...whyChooseData,
+          subtitle: e.target.value,
+        })
+      }
+      className="w-full border p-2 mb-3"
+    />
+
+    {/* Features List */}
+    {whyChooseData.features.map((item, index) => (
+      <div key={index} className="mb-4 border-t pt-3">
+
+        <p className="text-sm mb-1">Feature {index + 1}</p>
+
+        {/* Feature Title */}
+        <input
+          value={item.title}
+          onChange={(e) => {
+            // copy array (immutable update)
+            const updated = [...whyChooseData.features]
+
+            // update specific item
+            updated[index].title = e.target.value
+
+            // set new state
+            setWhyChooseData({
+              ...whyChooseData,
+              features: updated,
+            })
+          }}
+          className="w-full border p-2 mb-2"
+        />
+
+        {/* Feature Description */}
+        <textarea
+          value={item.desc}
+          onChange={(e) => {
+            const updated = [...whyChooseData.features]
+            updated[index].desc = e.target.value
+
+            setWhyChooseData({
+              ...whyChooseData,
+              features: updated,
+            })
+          }}
+          className="w-full border p-2"
+        />
+
+        {/* ✅ DELETE BUTTON (must be inside map to access index) */}
+        <button
+          onClick={() => {
+            // remove selected item using filter
+            const updated = whyChooseData.features.filter((_, i) => i !== index)
+
+            setWhyChooseData({
+              ...whyChooseData,
+              features: updated,
+            })
+          }}
+          className="bg-red-500 text-white px-2 py-1 rounded text-sm mt-2"
+        >
+          Delete
+        </button>
+
+      </div>
+    ))}
+
+    {/* ✅ ADD FEATURE BUTTON */}
+<button
+  onClick={() => {
+    // prevent adding if limit reached
+    if (whyChooseData.features.length >= 5) return
+
+    setWhyChooseData({
+      ...whyChooseData,
+      features: [
+        ...whyChooseData.features,
+        {
+          id: Date.now(),
+          title: "New Feature",
+          desc: "Description...",
+        },
+      ],
+    })
+  }}
+  disabled={whyChooseData.features.length >= 5}
+  className={`px-3 py-2 rounded w-full mb-3 ${
+    whyChooseData.features.length >= 5
+      ? "bg-gray-300 cursor-not-allowed"
+      : "bg-gray-200"
+  }`}
+>
+  + Add Feature
+</button>
+
+    {/* Save / Close Panel */}
+    <button
+      onClick={() => setEditingSection(null)}
+      className="bg-pink-500 text-white px-4 py-2 rounded w-full"
+    >
+      Save
+    </button>
+
+  {/* Templates */}
+<div className="mb-3">
+  <p className="text-sm mb-2">Choose Template</p>
+
+  <div className="flex gap-2">
+    {whyChooseTemplates.map((img, i) => (
+      <img
+        key={i}
+        src={img}
+        onClick={() =>
+          setWhyChooseData({
+            ...whyChooseData,
+            image: img,
+          })
+        }
+        className="w-16 h-16 object-cover rounded cursor-pointer border hover:scale-105 transition"
+      />
+    ))}
+  </div>
+</div>
+
+{/* IMAGE UPLOAD (must be outside features map) */}
+<input
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    const reader = new FileReader()
+
+    reader.onloadend = () => {
+      setWhyChooseData({
+        ...whyChooseData,
+        image: reader.result, // base64 image
+      })
+    }
+
+    reader.readAsDataURL(file)
+  }}
+  className="w-full mb-3"
+/>
+
+  </div>
+)}
+
       {/*site content*/}
       <div className={`min-h-screen flex flex-col ${editMode ? "pt-[60px]" : ""}`}>
         <Navbar />
@@ -140,7 +337,10 @@ const [heroData, setHeroData] = useState({
             </AnimatedSection>
 
             <AnimatedSection delay={0.05}>
-              <WhyChoose />
+              <WhyChoose 
+                editMode={editMode}
+                data={whyChooseData}
+                onEdit={setEditingSection}/>
             </AnimatedSection>
 
             <div id="services">
