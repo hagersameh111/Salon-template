@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react"
+import { lazy, Suspense, useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
@@ -30,35 +30,59 @@ const [editMode, setEditMode] = useState(false)
 const [editingSection, setEditingSection] = useState(null)
 
 // GLOBAL STATE for Hero (temporary step)
-const [heroData, setHeroData] = useState({
-  title: "Default Title",
-  description: "Default Description",
-  button: "Book Now",
+const [heroData, setHeroData] = useState(() => {
+  const saved = localStorage.getItem("heroData")
+
+  if (saved) {
+    return JSON.parse(saved)
+  }
+
+  return {
+    title: "Default Title",
+    description: "Default Description",
+    button: "Book Now",
+  }
 })
+// SAVE HERO
+useEffect(() => {
+  localStorage.setItem("heroData", JSON.stringify(heroData))
+}, [heroData])
+
 // GLOBAL STATE for WhyChoose (temporary step)
 const whyChooseTemplates = [
   "/why-full.jpg",
   "/facial2.jpg",
   "/nails.jpg",
 ]
-const [whyChooseData, setWhyChooseData] = useState({
-  title: "Why Choose SŌRA?",
-  subtitle: "A personalized skincare experience focused on real, lasting results.",
-  image: "/why-full.jpg", // ✅ NEW
-  features: [
+const [whyChooseData, setWhyChooseData] = useState(() => {
+  const saved = localStorage.getItem("whyChooseData")
 
-    {
-      id: "hijabFriendly",
-      title: "Hijab-Friendly",
-      desc: "Only female staff and no CCTV for your privacy",
-    },
-    {
-      id: "customized",
-      title: "Customized Treatments",
-      desc: "Every facial is tailored to your unique skin needs and goals.",
-    },
-  ],
+  if (saved) {
+    return JSON.parse(saved)
+  }
+
+  return {
+    title: "Why Choose SŌRA?",
+    subtitle: "A personalized skincare experience focused on real, lasting results.",
+    image: "/why-full.jpg",
+    features: [
+      {
+        id: "hijabFriendly",
+        title: "Hijab-Friendly",
+        desc: "Only female staff and no CCTV for your privacy",
+      },
+      {
+        id: "customized",
+        title: "Customized Treatments",
+        desc: "Every facial is tailored to your unique skin needs and goals.",
+      },
+    ],
+  }
 })
+// SAVE WHY-CHOOSE
+useEffect(() => {
+  localStorage.setItem("whyChooseData", JSON.stringify(whyChooseData))
+}, [whyChooseData])
 
   return (
     <>
