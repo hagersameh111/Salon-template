@@ -34,7 +34,9 @@ const Hero = ({ editMode, heroData, onEdit }) => {
         {/* EDIT BUTTON (only appears in edit mode) */}
         {editMode && (
 <button
-  onClick={() => onEdit("hero")} // 🔥 tell Home to edit hero
+  onClick={() => {
+  onEdit("hero")
+}} //  tell Home to edit hero
   className="absolute top-4 left-4 bg-white px-3 py-1 rounded shadow text-sm z-20"
 >
   ✏ Edit

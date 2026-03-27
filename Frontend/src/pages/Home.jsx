@@ -32,21 +32,17 @@ const [editingSection, setEditingSection] = useState(null)
 // GLOBAL STATE for Hero (temporary step)
 const [heroData, setHeroData] = useState(() => {
   const saved = localStorage.getItem("heroData")
-
-  if (saved) {
-    return JSON.parse(saved)
-  }
-
-  return {
+  return saved ? JSON.parse(saved) : {
     title: "Default Title",
     description: "Default Description",
     button: "Book Now",
   }
 })
-// SAVE HERO
 useEffect(() => {
   localStorage.setItem("heroData", JSON.stringify(heroData))
 }, [heroData])
+
+const [heroDraft, setHeroDraft] = useState(heroData)
 
 // GLOBAL STATE for WhyChoose (temporary step)
 const whyChooseTemplates = [
@@ -54,8 +50,9 @@ const whyChooseTemplates = [
   "/facial2.jpg",
   "/nails.jpg",
 ]
-const [whyChooseData, setWhyChooseData] = useState(() => {
+  const [whyChooseData, setWhyChooseData] = useState(() => {
   const saved = localStorage.getItem("whyChooseData")
+  
 
   if (saved) {
     return JSON.parse(saved)
@@ -79,6 +76,9 @@ const [whyChooseData, setWhyChooseData] = useState(() => {
     ],
   }
 })
+// WHYCHOOSE DRAFT (temporary editing state)
+const [whyChooseDraft, setWhyChooseDraft] = useState(whyChooseData)
+
 // SAVE WHY-CHOOSE
 useEffect(() => {
   localStorage.setItem("whyChooseData", JSON.stringify(whyChooseData))
@@ -118,8 +118,9 @@ useEffect(() => {
 
         </div>
       )}
+      
 
-      {/* Hero Edit Panel */}
+{/* Hero Edit Panel */}
       {editingSection === "hero" && (
   <div className="fixed top-0 right-0 w-[320px] h-full bg-white shadow-xl z-[9999] p-4">
 
@@ -127,43 +128,49 @@ useEffect(() => {
 
     {/* Title */}
     <input
-      value={heroData.title}
-      onChange={(e) =>
-        setHeroData({
-          ...heroData,
-          title: e.target.value,
-        })
-      }
-      className="w-full border p-2 mb-3"
-    />
+value={heroDraft.title}
+onChange={(e) =>
+  setHeroDraft({
+    ...heroDraft,
+    title: e.target.value,
+  })
+}
+  className="w-full border p-2 mb-3"
+/>
 
-    {/* Description */}
-    <textarea
-      value={heroData.description}
-      onChange={(e) =>
-        setHeroData({
-          ...heroData,
-          description: e.target.value,
-        })
-      }
-      className="w-full border p-2 mb-3"
-    />
 
-    {/* Button */}
-    <input
-      value={heroData.button}
-      onChange={(e) =>
-        setHeroData({
-          ...heroData,
-          button: e.target.value,
-        })
-      }
-      className="w-full border p-2 mb-3"
-    />
+{/* Description */}
+<textarea
+  value={heroDraft.description} 
+  onChange={(e) =>
+    setHeroDraft({
+      ...heroDraft,
+      description: e.target.value,
+    })
+  }
+  
+  className="w-full border p-2 mb-3"
+/>
+
+
+{/* Button */}
+<input
+  value={heroDraft.button} 
+  onChange={(e) =>
+    setHeroDraft({
+      ...heroDraft,
+      button: e.target.value,
+    })
+  }
+  className="w-full border p-2 mb-3"
+/>
 
     {/* Close */}
     <button
-      onClick={() => setEditingSection(null)}
+      onClick={() => {
+  setHeroData(heroDraft) // apply changes
+  setEditingSection(null)
+}}
       className="bg-pink-500 text-white px-4 py-2 rounded w-full"
     >
       Save
@@ -171,6 +178,7 @@ useEffect(() => {
 
   </div>
 )}
+
 
 {/* WhyChoose Edit Panel */}
 {editingSection === "whyChoose" && (
@@ -180,10 +188,10 @@ useEffect(() => {
 
     {/* Title Input */}
     <input
-      value={whyChooseData.title}
+      value={whyChooseDraft.title}
       onChange={(e) =>
-        setWhyChooseData({
-          ...whyChooseData,
+        setWhyChooseDraft({
+          ...whyChooseDraft,
           title: e.target.value,
         })
       }
@@ -192,10 +200,10 @@ useEffect(() => {
 
     {/* Subtitle Input */}
     <textarea
-      value={whyChooseData.subtitle}
+      value={whyChooseDraft.subtitle}
       onChange={(e) =>
-        setWhyChooseData({
-          ...whyChooseData,
+        setWhyChooseDraft({
+          ...whyChooseDraft,
           subtitle: e.target.value,
         })
       }
@@ -203,7 +211,7 @@ useEffect(() => {
     />
 
     {/* Features List */}
-    {whyChooseData.features.map((item, index) => (
+    {whyChooseDraft.features.map((item, index) => (
       <div key={index} className="mb-4 border-t pt-3">
 
         <p className="text-sm mb-1">Feature {index + 1}</p>
@@ -213,14 +221,14 @@ useEffect(() => {
           value={item.title}
           onChange={(e) => {
             // copy array (immutable update)
-            const updated = [...whyChooseData.features]
+            const updated = [...whyChooseDraft.features]
 
             // update specific item
             updated[index].title = e.target.value
 
             // set new state
-            setWhyChooseData({
-              ...whyChooseData,
+            setWhyChooseDraft({
+              ...whyChooseDraft,
               features: updated,
             })
           }}
@@ -231,25 +239,25 @@ useEffect(() => {
         <textarea
           value={item.desc}
           onChange={(e) => {
-            const updated = [...whyChooseData.features]
+            const updated = [...whyChooseDraft.features]
             updated[index].desc = e.target.value
 
-            setWhyChooseData({
-              ...whyChooseData,
+            setWhyChooseDraft({
+              ...whyChooseDraft,
               features: updated,
             })
           }}
           className="w-full border p-2"
         />
 
-        {/* ✅ DELETE BUTTON (must be inside map to access index) */}
+        {/* DELETE BUTTON (must be inside map to access index) */}
         <button
           onClick={() => {
             // remove selected item using filter
-            const updated = whyChooseData.features.filter((_, i) => i !== index)
+            const updated = whyChooseDraft.features.filter((_, i) => i !== index)
 
-            setWhyChooseData({
-              ...whyChooseData,
+            setWhyChooseDraft({
+              ...whyChooseDraft,
               features: updated,
             })
           }}
@@ -261,16 +269,16 @@ useEffect(() => {
       </div>
     ))}
 
-    {/* ✅ ADD FEATURE BUTTON */}
+    {/* ADD FEATURE BUTTON */}
 <button
   onClick={() => {
     // prevent adding if limit reached
-    if (whyChooseData.features.length >= 5) return
+    if (whyChooseDraft.features.length >= 5) return
 
-    setWhyChooseData({
-      ...whyChooseData,
+    setWhyChooseDraft({
+      ...whyChooseDraft,
       features: [
-        ...whyChooseData.features,
+        ...whyChooseDraft.features,
         {
           id: Date.now(),
           title: "New Feature",
@@ -279,23 +287,15 @@ useEffect(() => {
       ],
     })
   }}
-  disabled={whyChooseData.features.length >= 5}
+  disabled={whyChooseDraft.features.length >= 5}
   className={`px-3 py-2 rounded w-full mb-3 ${
-    whyChooseData.features.length >= 5
+    whyChooseDraft.features.length >= 5
       ? "bg-gray-300 cursor-not-allowed"
       : "bg-gray-200"
   }`}
 >
   + Add Feature
 </button>
-
-    {/* Save / Close Panel */}
-    <button
-      onClick={() => setEditingSection(null)}
-      className="bg-pink-500 text-white px-4 py-2 rounded w-full"
-    >
-      Save
-    </button>
 
   {/* Templates */}
 <div className="mb-3">
@@ -307,8 +307,8 @@ useEffect(() => {
         key={i}
         src={img}
         onClick={() =>
-          setWhyChooseData({
-            ...whyChooseData,
+          setWhyChooseDraft({
+            ...whyChooseDraft,
             image: img,
           })
         }
@@ -329,8 +329,8 @@ useEffect(() => {
     const reader = new FileReader()
 
     reader.onloadend = () => {
-      setWhyChooseData({
-        ...whyChooseData,
+      setWhyChooseDraft({
+        ...whyChooseDraft,
         image: reader.result, // base64 image
       })
     }
@@ -339,7 +339,25 @@ useEffect(() => {
   }}
   className="w-full mb-3"
 />
+    {/* Save / Close Panel */}
+    <button
+      onClick={() => {
+    setWhyChooseData(whyChooseDraft) // SAVE
+    setEditingSection(null)
+}}
+      className="bg-pink-500 text-white px-4 py-2 rounded w-full"
+    >
+      Save
+    </button>
 
+    <button
+  onClick={() => {
+    setWhyChooseDraft(JSON.parse(JSON.stringify(whyChooseData))) // reset draft to current saved data
+  }}
+  className="bg-gray-300 text-black px-4 py-2 rounded w-full mt-2"
+>
+  Reset
+</button>
   </div>
 )}
 
@@ -352,8 +370,17 @@ useEffect(() => {
             
             <div id="hero">
               <AnimatedSection>
-                <Hero editMode={editMode} heroData={heroData} onEdit={setEditingSection} />
-              </AnimatedSection>
+<Hero
+  editMode={editMode}
+  heroData={editingSection === "hero" ? heroDraft : heroData}
+  onEdit={(section) => {
+    setEditingSection(section)
+
+    if (section === "hero") {
+      setHeroDraft(heroData) // important
+    }
+  }}
+/>              </AnimatedSection>
             </div>
 
             <AnimatedSection delay={0.03}>
@@ -363,14 +390,20 @@ useEffect(() => {
             <AnimatedSection delay={0.05}>
               <WhyChoose 
                 editMode={editMode}
-                data={whyChooseData}
-                onEdit={setEditingSection}/>
+                data={editingSection === "whyChoose" ? whyChooseDraft : whyChooseData}
+                onEdit={(section) => {
+  setEditingSection(section)
+
+  if (section === "whyChoose") {
+    setWhyChooseDraft(whyChooseData)
+  }
+}}/>
             </AnimatedSection>
 
             <div id="services">
-              <AnimatedSection delay={0.07}>
+            <AnimatedSection delay={0.07}>
                 <Services />
-              </AnimatedSection>
+            </AnimatedSection>
             </div>
 
             <AnimatedSection delay={0.09}>
