@@ -2,7 +2,9 @@ import { lazy, Suspense, useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
+
 import HeroPanel from "../components/EditPanels/HeroPanel"
+import WhyChoosePanel from "../components/EditPanels/WhyChoosePanel"
 
 const HeroImport = () => import("../components/HomeSections/Hero/Hero")
 const Hero = lazy(HeroImport)
@@ -134,185 +136,20 @@ useEffect(() => {
   />
 )}
 
-{/* WhyChoose Edit Panel */}
+{/* Why Choose Edit Panel */}
 {editingSection === "whyChoose" && (
-  <div className="fixed top-0 right-0 w-[320px] h-full bg-white shadow-xl z-[9999] p-4 overflow-y-auto pb-20">
-
-    <h2 className="font-semibold mb-4">Edit Why Choose</h2>
-
-    {/* Title Input */}
-    <input
-      value={whyChooseDraft.title}
-      onChange={(e) =>
-        setWhyChooseDraft({
-          ...whyChooseDraft,
-          title: e.target.value,
-        })
-      }
-      className="w-full border p-2 mb-3"
-    />
-
-    {/* Subtitle Input */}
-    <textarea
-      value={whyChooseDraft.subtitle}
-      onChange={(e) =>
-        setWhyChooseDraft({
-          ...whyChooseDraft,
-          subtitle: e.target.value,
-        })
-      }
-      className="w-full border p-2 mb-3"
-    />
-
-    {/* Features List */}
-    {whyChooseDraft.features.map((item, index) => (
-      <div key={index} className="mb-4 border-t pt-3">
-
-        <p className="text-sm mb-1">Feature {index + 1}</p>
-
-        {/* Feature Title */}
-        <input
-          value={item.title}
-          onChange={(e) => {
-            // copy array (immutable update)
-            const updated = [...whyChooseDraft.features]
-
-            // update specific item
-            updated[index].title = e.target.value
-
-            // set new state
-            setWhyChooseDraft({
-              ...whyChooseDraft,
-              features: updated,
-            })
-          }}
-          className="w-full border p-2 mb-2"
-        />
-
-        {/* Feature Description */}
-        <textarea
-          value={item.desc}
-          onChange={(e) => {
-            const updated = [...whyChooseDraft.features]
-            updated[index].desc = e.target.value
-
-            setWhyChooseDraft({
-              ...whyChooseDraft,
-              features: updated,
-            })
-          }}
-          className="w-full border p-2"
-        />
-
-        {/* DELETE BUTTON (must be inside map to access index) */}
-        <button
-          onClick={() => {
-            // remove selected item using filter
-            const updated = whyChooseDraft.features.filter((_, i) => i !== index)
-
-            setWhyChooseDraft({
-              ...whyChooseDraft,
-              features: updated,
-            })
-          }}
-          className="bg-red-500 text-white px-2 py-1 rounded text-sm mt-2"
-        >
-          Delete
-        </button>
-
-      </div>
-    ))}
-
-    {/* ADD FEATURE BUTTON */}
-<button
-  onClick={() => {
-    // prevent adding if limit reached
-    if (whyChooseDraft.features.length >= 5) return
-
-    setWhyChooseDraft({
-      ...whyChooseDraft,
-      features: [
-        ...whyChooseDraft.features,
-        {
-          id: Date.now(),
-          title: "New Feature",
-          desc: "Description...",
-        },
-      ],
-    })
-  }}
-  disabled={whyChooseDraft.features.length >= 5}
-  className={`px-3 py-2 rounded w-full mb-3 ${
-    whyChooseDraft.features.length >= 5
-      ? "bg-gray-300 cursor-not-allowed"
-      : "bg-gray-200"
-  }`}
->
-  + Add Feature
-</button>
-
-  {/* Templates */}
-<div className="mb-3">
-  <p className="text-sm mb-2">Choose Template</p>
-
-  <div className="flex gap-2">
-    {whyChooseTemplates.map((img, i) => (
-      <img
-        key={i}
-        src={img}
-        onClick={() =>
-          setWhyChooseDraft({
-            ...whyChooseDraft,
-            image: img,
-          })
-        }
-        className="w-16 h-16 object-cover rounded cursor-pointer border hover:scale-105 transition"
-      />
-    ))}
-  </div>
-</div>
-
-{/* IMAGE UPLOAD (must be outside features map) */}
-<input
-  type="file"
-  accept="image/*"
-  onChange={(e) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    const reader = new FileReader()
-
-    reader.onloadend = () => {
-      setWhyChooseDraft({
-        ...whyChooseDraft,
-        image: reader.result, // base64 image
-      })
-    }
-
-    reader.readAsDataURL(file)
-  }}
-  className="w-full mb-3"
-/>
-    {/* Save / Close Panel */}
-    <button
-      onClick={() => {
-    setWhyChooseData(whyChooseDraft) // SAVE
-    setEditingSection(null)
-}}
-      className="bg-pink-500 text-white px-4 py-2 rounded w-full"
-    >
-      Save
-    </button>
-
-    <button
-  onClick={() => {
-    setWhyChooseDraft(JSON.parse(JSON.stringify(whyChooseData))) // reset draft to current saved data
-  }}
-  className="bg-gray-300 text-black px-4 py-2 rounded w-full mt-2"
->
-  Reset
-</button>
-  </div>
+  <WhyChoosePanel
+    draft={whyChooseDraft}
+    setDraft={setWhyChooseDraft}
+    templates={whyChooseTemplates}
+    onSave={() => {
+      setWhyChooseData(whyChooseDraft)
+      setEditingSection(null)
+    }}
+    onReset={() => {
+      setWhyChooseDraft(JSON.parse(JSON.stringify(whyChooseData)))
+    }}
+  />
 )}
 
       {/*site content*/}
