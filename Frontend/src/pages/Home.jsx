@@ -1,14 +1,15 @@
 import { lazy, Suspense, useState, useEffect } from "react"
 import { motion } from "framer-motion"
+
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 
+// Edit Panels
 import HeroPanel from "../components/EditPanels/HeroPanel"
 import WhyChoosePanel from "../components/EditPanels/WhyChoosePanel"
 
-const HeroImport = () => import("../components/HomeSections/Hero/Hero")
-const Hero = lazy(HeroImport)
-
+// ================= LAZY SECTIONS =================
+const Hero = lazy(() => import("../components/HomeSections/Hero/Hero"))
 const TrustBar = lazy(() => import("../components/HomeSections/Bars/TrustBar"))
 const WhyChoose = lazy(() => import("../components/HomeSections/WhyChooseUs/WhyChoose"))
 const Services = lazy(() => import("../components/HomeSections/Services/Servicepage"))
@@ -17,6 +18,7 @@ const AboutSection = lazy(() => import("../components/HomeSections/About/AboutSe
 const Reviews = lazy(() => import("../components/HomeSections/Reviews/Reviews"))
 const VisitSection = lazy(() => import("../components/HomeSections/VisitUs/VisitSection"))
 
+// ================= ANIMATION WRAPPER =================
 const AnimatedSection = ({ children, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 28 }}
@@ -28,80 +30,85 @@ const AnimatedSection = ({ children, delay = 0 }) => (
   </motion.div>
 )
 
+// ================= MAIN COMPONENT =================
 const Home = () => {
-const [editMode, setEditMode] = useState(false)
-const [editingSection, setEditingSection] = useState(null)
 
-// GLOBAL STATE for Hero (temporary step)
-const [heroData, setHeroData] = useState(() => {
-  const saved = localStorage.getItem("heroData")
-  return saved ? JSON.parse(saved) : {
-    title: "Default Title",
-    description: "Default Description",
-    button: "Book Now",
-  }
-})
-useEffect(() => {
-  localStorage.setItem("heroData", JSON.stringify(heroData))
-}, [heroData])
+  // ================= GLOBAL UI STATE =================
+  const [editMode, setEditMode] = useState(false)
+  const [editingSection, setEditingSection] = useState(null)
 
-const [heroDraft, setHeroDraft] = useState(heroData)
+  // ================= HERO STATE =================
+  const [heroData, setHeroData] = useState(() => {
+    const saved = localStorage.getItem("heroData")
+    return saved ? JSON.parse(saved) : {
+      title: "Default Title",
+      description: "Default Description",
+      button: "Book Now",
+    }
+  })
 
-// GLOBAL STATE for WhyChoose (temporary step)
-const whyChooseTemplates = [
-  "/why-full.jpg",
-  "/facial2.jpg",
-  "/nails.jpg",
-]
+  // draft (used for editing before saving)
+  const [heroDraft, setHeroDraft] = useState(heroData)
+
+  // persist hero
+  useEffect(() => {
+    localStorage.setItem("heroData", JSON.stringify(heroData))
+  }, [heroData])
+
+
+  // ================= WHY CHOOSE STATE =================
+  const whyChooseTemplates = [
+    "/why-full.jpg",
+    "/facial2.jpg",
+    "/nails.jpg",
+  ]
+
   const [whyChooseData, setWhyChooseData] = useState(() => {
-  const saved = localStorage.getItem("whyChooseData")
-  
+    const saved = localStorage.getItem("whyChooseData")
 
-  if (saved) {
-    return JSON.parse(saved)
-  }
+    return saved ? JSON.parse(saved) : {
+      title: "Why Choose SŌRA?",
+      subtitle: "A personalized skincare experience focused on real, lasting results.",
+      image: "/why-full.jpg",
+      features: [
+        {
+          id: "hijabFriendly",
+          title: "Hijab-Friendly",
+          desc: "Only female staff and no CCTV for your privacy",
+        },
+        {
+          id: "customized",
+          title: "Customized Treatments",
+          desc: "Every facial is tailored to your unique skin needs and goals.",
+        },
+      ],
+    }
+  })
 
-  return {
-    title: "Why Choose SŌRA?",
-    subtitle: "A personalized skincare experience focused on real, lasting results.",
-    image: "/why-full.jpg",
-    features: [
-      {
-        id: "hijabFriendly",
-        title: "Hijab-Friendly",
-        desc: "Only female staff and no CCTV for your privacy",
-      },
-      {
-        id: "customized",
-        title: "Customized Treatments",
-        desc: "Every facial is tailored to your unique skin needs and goals.",
-      },
-    ],
-  }
-})
-// WHYCHOOSE DRAFT (temporary editing state)
-const [whyChooseDraft, setWhyChooseDraft] = useState(whyChooseData)
+  // draft editing
+  const [whyChooseDraft, setWhyChooseDraft] = useState(whyChooseData)
 
-// SAVE WHY-CHOOSE
-useEffect(() => {
-  localStorage.setItem("whyChooseData", JSON.stringify(whyChooseData))
-}, [whyChooseData])
+  // persist why choose
+  useEffect(() => {
+    localStorage.setItem("whyChooseData", JSON.stringify(whyChooseData))
+  }, [whyChooseData])
 
+
+  // ================= RENDER =================
   return (
     <>
-    <button
-  onClick={() => setEditMode(true)}
-  className="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded z-[9999]"
->
-  Fake Login
-</button>
-      {/* Edit Mode Bar */}
+      {/* ===== Fake Login Button (enter edit mode) ===== */}
+      <button
+        onClick={() => setEditMode(true)}
+        className="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded z-[9999]"
+      >
+        Fake Login
+      </button>
+
+      {/* ===== Top Edit Bar ===== */}
       {editMode && (
         <div className="fixed top-0 left-0 w-full h-[60px] bg-white shadow z-[9999] flex items-center justify-between px-6">
-          
-          <div className="font-semibold">
-            Edit Mode
-          </div>
+          <div className="font-semibold">Edit Mode</div>
 
           <div className="flex gap-4 items-center">
             <button className="text-sm">Theme</button>
@@ -118,84 +125,84 @@ useEffect(() => {
               Exit
             </button>
           </div>
-
         </div>
       )}
-      
 
-{/* Hero Edit Panel */}
-{editingSection === "hero" && (
-  <HeroPanel
-    draft={heroDraft}
-    setDraft={setHeroDraft}
-    onSave={() => {
-      setHeroData(heroDraft)
-      setEditingSection(null)
-    }}
-    onClose={() => setEditingSection(null)}
-  />
-)}
+      {/* ===== HERO PANEL ===== */}
+      {editingSection === "hero" && (
+        <HeroPanel
+          draft={heroDraft}
+          setDraft={setHeroDraft}
+          onSave={() => {
+            setHeroData(heroDraft)
+            setEditingSection(null)
+          }}
+          onClose={() => setEditingSection(null)}
+        />
+      )}
 
-{/* Why Choose Edit Panel */}
-{editingSection === "whyChoose" && (
-  <WhyChoosePanel
-    draft={whyChooseDraft}
-    setDraft={setWhyChooseDraft}
-    templates={whyChooseTemplates}
-    onSave={() => {
-      setWhyChooseData(whyChooseDraft)
-      setEditingSection(null)
-    }}
-    onReset={() => {
-      setWhyChooseDraft(JSON.parse(JSON.stringify(whyChooseData)))
-    }}
-  />
-)}
+      {/* ===== WHY CHOOSE PANEL ===== */}
+      {editingSection === "whyChoose" && (
+        <WhyChoosePanel
+          draft={whyChooseDraft}
+          setDraft={setWhyChooseDraft}
+          templates={whyChooseTemplates}
+          onSave={() => {
+            setWhyChooseData(whyChooseDraft)
+            setEditingSection(null)
+          }}
+          onReset={() => {
+            setWhyChooseDraft(JSON.parse(JSON.stringify(whyChooseData)))
+          }}
+        />
+      )}
 
-      {/*site content*/}
+      {/* ===== MAIN SITE ===== */}
       <div className={`min-h-screen flex flex-col ${editMode ? "pt-[60px]" : ""}`}>
         <Navbar />
 
         <main className="flex-1">
           <Suspense fallback={<div className="min-h-[60vh]" />}>
-            
-            <div id="hero">
-              <AnimatedSection>
-<Hero
-  editMode={editMode}
-  heroData={editingSection === "hero" ? heroDraft : heroData}
-  onEdit={(section) => {
-    setEditingSection(section)
 
-    if (section === "hero") {
-      setHeroDraft(heroData) // important
-    }
-  }}
-/>              </AnimatedSection>
-            </div>
+            {/* ===== HERO ===== */}
+            <AnimatedSection>
+              <Hero
+                editMode={editMode}
+                heroData={editingSection === "hero" ? heroDraft : heroData}
+                onEdit={(section) => {
+                  setEditingSection(section)
 
+                  if (section === "hero") {
+                    setHeroDraft(heroData)
+                  }
+                }}
+              />
+            </AnimatedSection>
+
+            {/* ===== TRUST BAR ===== */}
             <AnimatedSection delay={0.03}>
               <TrustBar />
             </AnimatedSection>
 
+            {/* ===== WHY CHOOSE ===== */}
             <AnimatedSection delay={0.05}>
-              <WhyChoose 
+              <WhyChoose
                 editMode={editMode}
                 data={editingSection === "whyChoose" ? whyChooseDraft : whyChooseData}
                 onEdit={(section) => {
-  setEditingSection(section)
+                  setEditingSection(section)
 
-  if (section === "whyChoose") {
-    setWhyChooseDraft(whyChooseData)
-  }
-}}/>
+                  if (section === "whyChoose") {
+                    setWhyChooseDraft(whyChooseData)
+                  }
+                }}
+              />
             </AnimatedSection>
 
-            <div id="services">
+            {/* ===== باقي السكاشن ===== */}
             <AnimatedSection delay={0.07}>
-                <Services />
+              <Services />
             </AnimatedSection>
-            </div>
 
             <AnimatedSection delay={0.09}>
               <GallerySection />
