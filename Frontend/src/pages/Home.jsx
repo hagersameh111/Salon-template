@@ -2,6 +2,7 @@ import { lazy, Suspense, useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
+import HeroPanel from "../components/EditPanels/HeroPanel"
 
 const HeroImport = () => import("../components/HomeSections/Hero/Hero")
 const Hero = lazy(HeroImport)
@@ -121,64 +122,17 @@ useEffect(() => {
       
 
 {/* Hero Edit Panel */}
-      {editingSection === "hero" && (
-  <div className="fixed top-0 right-0 w-[320px] h-full bg-white shadow-xl z-[9999] p-4">
-
-    <h2 className="font-semibold mb-4">Edit Hero</h2>
-
-    {/* Title */}
-    <input
-value={heroDraft.title}
-onChange={(e) =>
-  setHeroDraft({
-    ...heroDraft,
-    title: e.target.value,
-  })
-}
-  className="w-full border p-2 mb-3"
-/>
-
-
-{/* Description */}
-<textarea
-  value={heroDraft.description} 
-  onChange={(e) =>
-    setHeroDraft({
-      ...heroDraft,
-      description: e.target.value,
-    })
-  }
-  
-  className="w-full border p-2 mb-3"
-/>
-
-
-{/* Button */}
-<input
-  value={heroDraft.button} 
-  onChange={(e) =>
-    setHeroDraft({
-      ...heroDraft,
-      button: e.target.value,
-    })
-  }
-  className="w-full border p-2 mb-3"
-/>
-
-    {/* Close */}
-    <button
-      onClick={() => {
-  setHeroData(heroDraft) // apply changes
-  setEditingSection(null)
-}}
-      className="bg-pink-500 text-white px-4 py-2 rounded w-full"
-    >
-      Save
-    </button>
-
-  </div>
+{editingSection === "hero" && (
+  <HeroPanel
+    draft={heroDraft}
+    setDraft={setHeroDraft}
+    onSave={() => {
+      setHeroData(heroDraft)
+      setEditingSection(null)
+    }}
+    onClose={() => setEditingSection(null)}
+  />
 )}
-
 
 {/* WhyChoose Edit Panel */}
 {editingSection === "whyChoose" && (
