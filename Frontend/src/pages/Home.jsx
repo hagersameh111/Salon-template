@@ -7,6 +7,7 @@ import Footer from '../components/layout/Footer'
 // Edit Panels
 import HeroPanel from "../components/EditPanels/HeroPanel"
 import WhyChoosePanel from "../components/EditPanels/WhyChoosePanel"
+import GalleryPanel from "../components/EditPanels/GalleryPanel"
 
 // ================= LAZY SECTIONS =================
 const Hero = lazy(() => import("../components/HomeSections/Hero/Hero"))
@@ -93,6 +94,29 @@ const Home = () => {
     localStorage.setItem("whyChooseData", JSON.stringify(whyChooseData))
   }, [whyChooseData])
 
+// ================= GALLERY STATE =================
+const [galleryData, setGalleryData] = useState(() => {
+  const saved = localStorage.getItem("galleryData")
+
+  return saved
+    ? JSON.parse(saved)
+    : {
+        instagramUrl: "https://instagram.com/",
+        images: [
+          { media_url: "/gallery1.jpg", caption: "" },
+          { media_url: "/gallery2.jpg", caption: "" },
+        ],
+      }
+})
+
+// draft (editing state)
+const [galleryDraft, setGalleryDraft] = useState(galleryData)
+
+// persist
+useEffect(() => {
+  localStorage.setItem("galleryData", JSON.stringify(galleryData))
+}, [galleryData])
+
 
   // ================= RENDER =================
   return (
@@ -157,6 +181,25 @@ const Home = () => {
         />
       )}
 
+      {/* ===== GALLERY PANEL ===== */}
+      {editingSection === "gallery" && (
+  <GalleryPanel
+    draft={galleryDraft}
+    setDraft={setGalleryDraft}
+    onSave={() => {
+      setGalleryData(galleryDraft)
+      setEditingSection(null)
+    }}
+onReset={() => {
+  const saved = localStorage.getItem("galleryData")
+
+  if (saved) {
+    setGalleryDraft(JSON.parse(saved))
+  }
+}}
+  />
+)}
+
       {/* ===== MAIN SITE ===== */}
       <div className={`min-h-screen flex flex-col ${editMode ? "pt-[60px]" : ""}`}>
         <Navbar />
@@ -205,7 +248,17 @@ const Home = () => {
             </AnimatedSection>
 
             <AnimatedSection delay={0.09}>
-              <GallerySection />
+            <GallerySection
+  editMode={editMode}
+  data={editingSection === "gallery" ? galleryDraft : galleryData}
+  onEdit={(section) => {
+    setEditingSection(section)
+
+    if (section === "gallery") {
+      setGalleryDraft(galleryData)
+    }
+  }}
+/>
             </AnimatedSection>
 
             <AnimatedSection delay={0.11}>
