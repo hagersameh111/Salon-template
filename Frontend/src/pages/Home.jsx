@@ -5,6 +5,7 @@ import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 
 import useGalleryState from "../hooks/useGalleryState"
+import useHeroState from "../hooks/useHeroState"
 
 // Edit Panels
 import HeroPanel from "../components/EditPanels/HeroPanel"
@@ -43,29 +44,17 @@ const {
   saveGallery,
   resetGallery,
 } = useGalleryState()
+const {
+  heroData,
+  heroDraft,
+  setHeroDraft,
+  startEditingHero,
+  saveHero,
+} = useHeroState()
 
   // ================= GLOBAL UI STATE =================
   const [editMode, setEditMode] = useState(false)
   const [editingSection, setEditingSection] = useState(null)
-
-  // ================= HERO STATE =================
-  const [heroData, setHeroData] = useState(() => {
-    const saved = localStorage.getItem("heroData")
-    return saved ? JSON.parse(saved) : {
-      title: "Default Title",
-      description: "Default Description",
-      button: "Book Now",
-    }
-  })
-
-  // draft (used for editing before saving)
-  const [heroDraft, setHeroDraft] = useState(heroData)
-
-  // persist hero
-  useEffect(() => {
-    localStorage.setItem("heroData", JSON.stringify(heroData))
-  }, [heroData])
-
 
   // ================= WHY CHOOSE STATE =================
   const whyChooseTemplates = [
@@ -144,7 +133,7 @@ const {
           draft={heroDraft}
           setDraft={setHeroDraft}
           onSave={() => {
-            setHeroData(heroDraft)
+            saveHero()
             setEditingSection(null)
           }}
           onClose={() => setEditingSection(null)}
@@ -196,7 +185,7 @@ const {
                   setEditingSection(section)
 
                   if (section === "hero") {
-                    setHeroDraft(heroData)
+                    startEditingHero()
                   }
                 }}
               />
