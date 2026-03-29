@@ -6,6 +6,7 @@ import Footer from '../components/layout/Footer'
 
 import useGalleryState from "../hooks/useGalleryState"
 import useHeroState from "../hooks/useHeroState"
+import useWhyChooseState from "../hooks/useWhyChooseState"
 
 // Edit Panels
 import HeroPanel from "../components/EditPanels/HeroPanel"
@@ -44,6 +45,7 @@ const {
   saveGallery,
   resetGallery,
 } = useGalleryState()
+
 const {
   heroData,
   heroDraft,
@@ -52,46 +54,24 @@ const {
   saveHero,
 } = useHeroState()
 
+const whyChooseTemplates = [
+  "/why-full.jpg",
+  "/facial2.jpg",
+  "/nails.jpg",
+]
+const {
+  whyChooseData,
+  whyChooseDraft,
+  setWhyChooseDraft,
+  startEditingWhyChoose,
+  saveWhyChoose,
+  resetWhyChoose,
+} = useWhyChooseState()
+
   // ================= GLOBAL UI STATE =================
   const [editMode, setEditMode] = useState(false)
   const [editingSection, setEditingSection] = useState(null)
 
-  // ================= WHY CHOOSE STATE =================
-  const whyChooseTemplates = [
-    "/why-full.jpg",
-    "/facial2.jpg",
-    "/nails.jpg",
-  ]
-
-  const [whyChooseData, setWhyChooseData] = useState(() => {
-    const saved = localStorage.getItem("whyChooseData")
-
-    return saved ? JSON.parse(saved) : {
-      title: "Why Choose SŌRA?",
-      subtitle: "A personalized skincare experience focused on real, lasting results.",
-      image: "/why-full.jpg",
-      features: [
-        {
-          id: "hijabFriendly",
-          title: "Hijab-Friendly",
-          desc: "Only female staff and no CCTV for your privacy",
-        },
-        {
-          id: "customized",
-          title: "Customized Treatments",
-          desc: "Every facial is tailored to your unique skin needs and goals.",
-        },
-      ],
-    }
-  })
-
-  // draft editing
-  const [whyChooseDraft, setWhyChooseDraft] = useState(whyChooseData)
-
-  // persist why choose
-  useEffect(() => {
-    localStorage.setItem("whyChooseData", JSON.stringify(whyChooseData))
-  }, [whyChooseData])
 
   // ================= RENDER =================
   return (
@@ -147,11 +127,11 @@ const {
           setDraft={setWhyChooseDraft}
           templates={whyChooseTemplates}
           onSave={() => {
-            setWhyChooseData(whyChooseDraft)
+            saveWhyChoose()
             setEditingSection(null)
           }}
           onReset={() => {
-            setWhyChooseDraft(JSON.parse(JSON.stringify(whyChooseData)))
+            resetWhyChoose()
           }}
         />
       )}
@@ -205,7 +185,7 @@ const {
                   setEditingSection(section)
 
                   if (section === "whyChoose") {
-                    setWhyChooseDraft(whyChooseData)
+                    startEditingWhyChoose()
                   }
                 }}
               />
