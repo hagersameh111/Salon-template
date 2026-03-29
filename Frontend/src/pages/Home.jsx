@@ -9,6 +9,7 @@ import useHeroState from "../hooks/useHeroState"
 import useWhyChooseState from "../hooks/useWhyChooseState"
 import useAboutState from "../hooks/useAboutState"
 import useVisitState from "../hooks/useVisitState"
+import useFooterState from "../hooks/useFooterState"
 
 // Edit Panels
 import HeroPanel from "../components/EditPanels/HeroPanel"
@@ -16,6 +17,7 @@ import WhyChoosePanel from "../components/EditPanels/WhyChoosePanel"
 import GalleryPanel from "../components/EditPanels/GalleryPanel"
 import AboutPanel from "../components/EditPanels/AboutPanel"
 import VisitPanel from "../components/EditPanels/VisitPanel"
+import FooterPanel from "../components/EditPanels/FooterPanel"
 
 
 // ================= LAZY SECTIONS =================
@@ -91,6 +93,15 @@ const {
   saveVisit,
   resetVisit,
 } = useVisitState()
+
+const {
+  footerData,
+  footerDraft,
+  setFooterDraft,
+  startEditingFooter,
+  saveFooter,
+  resetFooter,
+} = useFooterState()
 
   // ================= GLOBAL UI STATE =================
   const [editMode, setEditMode] = useState(false)
@@ -197,6 +208,19 @@ const {
   />
 )}
 
+{/* FOOTER PANEL */}
+{editingSection === "footer" && (
+  <FooterPanel
+    draft={footerDraft}
+    setDraft={setFooterDraft}
+    onSave={() => {
+      saveFooter()
+      setEditingSection(null)
+    }}
+    onReset={resetFooter}
+  />
+)}
+
 
       {/* ===== MAIN SITE ===== */}
       <div className={`min-h-screen flex flex-col ${editMode ? "pt-[60px]" : ""}`}>
@@ -291,7 +315,17 @@ if (section === "gallery") {
           </Suspense>
         </main>
 
-        <Footer />
+        <Footer
+  editMode={editMode}
+  data={editingSection === "footer" ? footerDraft : footerData}
+  onEdit={(section) => {
+    setEditingSection(section)
+
+    if (section === "footer") {
+      startEditingFooter()
+    }
+  }}
+/>
       </div>
     </>
   )
