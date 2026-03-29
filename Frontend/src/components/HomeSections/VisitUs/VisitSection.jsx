@@ -72,11 +72,11 @@ const VisitSection = ({ editMode, data, onEdit }) => {
               className="w-full h-[300px] rounded-[24px] overflow-hidden"
             >
               {loadMap ? (
-                <iframe
-                  src={data.mapUrl}
-                  className="w-full h-full border-0"
-                  loading="lazy"
-                />
+<iframe
+  src={`https://www.google.com/maps?q=${encodeURIComponent(data.address)}&output=embed`}
+  className="w-full h-full border-0"
+  loading="lazy"
+/>
               ) : (
                 <img src={data.mapImage} className="w-full h-full object-cover" />
               )}
@@ -112,7 +112,9 @@ const VisitSection = ({ editMode, data, onEdit }) => {
                 </h4>
               </div>
 
-              <p className="text-sm">{data.email}</p>
+              <a href={`mailto:${data.email}`} className="text-sm underline">
+  {data.email}
+</a>
             </div>
 
             {/* INSTAGRAM */}
@@ -124,7 +126,13 @@ const VisitSection = ({ editMode, data, onEdit }) => {
                 </h4>
               </div>
 
-              <p className="text-sm">{data.instagram}</p>
+              <a
+  href={`https://instagram.com/${data.instagram.replace("@", "")}`}
+  target="_blank"
+  className="text-sm underline"
+>
+  {data.instagram}
+</a>
             </div>
 
             {/* WHATSAPP */}
@@ -136,7 +144,13 @@ const VisitSection = ({ editMode, data, onEdit }) => {
                 </h4>
               </div>
 
-              <p className="text-sm">{data.whatsapp}</p>
+              <a
+  href={`https://wa.me/${data.whatsapp.replace(/\D/g, "")}`}
+  target="_blank"
+  className="text-sm underline"
+>
+  {data.whatsapp}
+</a>
             </div>
 
             {/* BUTTON */}
