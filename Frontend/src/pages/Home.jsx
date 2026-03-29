@@ -4,6 +4,8 @@ import { motion } from "framer-motion"
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
 
+import useGalleryState from "../hooks/useGalleryState"
+
 // Edit Panels
 import HeroPanel from "../components/EditPanels/HeroPanel"
 import WhyChoosePanel from "../components/EditPanels/WhyChoosePanel"
@@ -33,6 +35,14 @@ const AnimatedSection = ({ children, delay = 0 }) => (
 
 // ================= MAIN COMPONENT =================
 const Home = () => {
+const {
+  galleryData,
+  galleryDraft,
+  setGalleryDraft,
+  startEditingGallery,
+  saveGallery,
+  resetGallery,
+} = useGalleryState()
 
   // ================= GLOBAL UI STATE =================
   const [editMode, setEditMode] = useState(false)
@@ -93,30 +103,6 @@ const Home = () => {
   useEffect(() => {
     localStorage.setItem("whyChooseData", JSON.stringify(whyChooseData))
   }, [whyChooseData])
-
-// ================= GALLERY STATE =================
-const [galleryData, setGalleryData] = useState(() => {
-  const saved = localStorage.getItem("galleryData")
-
-  return saved
-    ? JSON.parse(saved)
-    : {
-        instagramUrl: "https://instagram.com/",
-        images: [
-          { media_url: "/gallery1.jpg", caption: "" },
-          { media_url: "/gallery2.jpg", caption: "" },
-        ],
-      }
-})
-
-// draft (editing state)
-const [galleryDraft, setGalleryDraft] = useState(galleryData)
-
-// persist
-useEffect(() => {
-  localStorage.setItem("galleryData", JSON.stringify(galleryData))
-}, [galleryData])
-
 
   // ================= RENDER =================
   return (
@@ -187,16 +173,10 @@ useEffect(() => {
     draft={galleryDraft}
     setDraft={setGalleryDraft}
     onSave={() => {
-      setGalleryData(galleryDraft)
+      saveGallery()
       setEditingSection(null)
     }}
-onReset={() => {
-  const saved = localStorage.getItem("galleryData")
-
-  if (saved) {
-    setGalleryDraft(JSON.parse(saved))
-  }
-}}
+    onReset={resetGallery}
   />
 )}
 
@@ -254,9 +234,9 @@ onReset={() => {
   onEdit={(section) => {
     setEditingSection(section)
 
-    if (section === "gallery") {
-      setGalleryDraft(galleryData)
-    }
+if (section === "gallery") {
+  startEditingGallery()
+}
   }}
 />
             </AnimatedSection>
