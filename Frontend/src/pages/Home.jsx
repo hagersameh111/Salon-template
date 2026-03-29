@@ -7,11 +7,13 @@ import Footer from '../components/layout/Footer'
 import useGalleryState from "../hooks/useGalleryState"
 import useHeroState from "../hooks/useHeroState"
 import useWhyChooseState from "../hooks/useWhyChooseState"
+import useAboutState from "../hooks/useAboutState"
 
 // Edit Panels
 import HeroPanel from "../components/EditPanels/HeroPanel"
 import WhyChoosePanel from "../components/EditPanels/WhyChoosePanel"
 import GalleryPanel from "../components/EditPanels/GalleryPanel"
+import AboutPanel from "../components/EditPanels/AboutPanel"
 
 // ================= LAZY SECTIONS =================
 const Hero = lazy(() => import("../components/HomeSections/Hero/Hero"))
@@ -67,6 +69,16 @@ const {
   saveWhyChoose,
   resetWhyChoose,
 } = useWhyChooseState()
+
+
+const {
+  aboutData,
+  aboutDraft,
+  setAboutDraft,
+  startEditingAbout,
+  saveAbout,
+  resetAbout,
+} = useAboutState()
 
   // ================= GLOBAL UI STATE =================
   const [editMode, setEditMode] = useState(false)
@@ -148,6 +160,19 @@ const {
     onReset={resetGallery}
   />
 )}
+{/* ABOUT PANEL */}
+{editingSection === "about" && (
+  <AboutPanel
+    draft={aboutDraft}
+    setDraft={setAboutDraft}
+    onSave={() => {
+      saveAbout()
+      setEditingSection(null)
+    }}
+    onReset={resetAbout}
+  />
+)}
+
 
       {/* ===== MAIN SITE ===== */}
       <div className={`min-h-screen flex flex-col ${editMode ? "pt-[60px]" : ""}`}>
@@ -211,7 +236,17 @@ if (section === "gallery") {
             </AnimatedSection>
 
             <AnimatedSection delay={0.11}>
-              <AboutSection />
+              <AboutSection
+  editMode={editMode}
+  data={editingSection === "about" ? aboutDraft : aboutData}
+  onEdit={(section) => {
+    setEditingSection(section)
+
+    if (section === "about") {
+      startEditingAbout()
+    }
+  }}
+/>
             </AnimatedSection>
 
             <AnimatedSection delay={0.13}>
