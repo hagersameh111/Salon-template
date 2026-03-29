@@ -8,12 +8,15 @@ import useGalleryState from "../hooks/useGalleryState"
 import useHeroState from "../hooks/useHeroState"
 import useWhyChooseState from "../hooks/useWhyChooseState"
 import useAboutState from "../hooks/useAboutState"
+import useVisitState from "../hooks/useVisitState"
 
 // Edit Panels
 import HeroPanel from "../components/EditPanels/HeroPanel"
 import WhyChoosePanel from "../components/EditPanels/WhyChoosePanel"
 import GalleryPanel from "../components/EditPanels/GalleryPanel"
 import AboutPanel from "../components/EditPanels/AboutPanel"
+import VisitPanel from "../components/EditPanels/VisitPanel"
+
 
 // ================= LAZY SECTIONS =================
 const Hero = lazy(() => import("../components/HomeSections/Hero/Hero"))
@@ -79,6 +82,15 @@ const {
   saveAbout,
   resetAbout,
 } = useAboutState()
+
+const {
+  visitData,
+  visitDraft,
+  setVisitDraft,
+  startEditingVisit,
+  saveVisit,
+  resetVisit,
+} = useVisitState()
 
   // ================= GLOBAL UI STATE =================
   const [editMode, setEditMode] = useState(false)
@@ -172,6 +184,18 @@ const {
     onReset={resetAbout}
   />
 )}
+ {/* VISIT PANEL */}
+{editingSection === "visit" && (
+  <VisitPanel
+    draft={visitDraft}
+    setDraft={setVisitDraft}
+    onSave={() => {
+      saveVisit()
+      setEditingSection(null)
+    }}
+    onReset={resetVisit}
+  />
+)}
 
 
       {/* ===== MAIN SITE ===== */}
@@ -254,7 +278,14 @@ if (section === "gallery") {
             </AnimatedSection>
 
             <AnimatedSection delay={0.15}>
-              <VisitSection />
+              <VisitSection
+  editMode={editMode}
+  data={editingSection === "visit" ? visitDraft : visitData}
+  onEdit={(section) => {
+    setEditingSection(section)
+    if (section === "visit") startEditingVisit()
+  }}
+/>
             </AnimatedSection>
 
           </Suspense>
