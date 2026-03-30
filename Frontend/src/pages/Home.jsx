@@ -3,6 +3,8 @@ import { motion } from "framer-motion"
 
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
+// Home.jsx
+import ServicesPage from "../components/HomeSections/Services/Servicepage"
 
 import useGalleryState from "../hooks/useGalleryState"
 import useHeroState from "../hooks/useHeroState"
@@ -18,6 +20,7 @@ import GalleryPanel from "../components/EditPanels/GalleryPanel"
 import AboutPanel from "../components/EditPanels/AboutPanel"
 import VisitPanel from "../components/EditPanels/VisitPanel"
 import FooterPanel from "../components/EditPanels/FooterPanel"
+import ServicesPanel from "../components/EditPanels/ServicesPanel"
 
 
 // ================= LAZY SECTIONS =================
@@ -106,6 +109,52 @@ const {
   // ================= GLOBAL UI STATE =================
   const [editMode, setEditMode] = useState(false)
   const [editingSection, setEditingSection] = useState(null)
+
+// ================= SERVICES STATE =================
+const [servicesData, setServicesData] = useState(() => {
+  
+  const saved = localStorage.getItem("servicesData")
+  return saved
+    ? JSON.parse(saved)
+    : {
+        categories: [
+          { id: "skincare", name: "SkinCare" },
+          { id: "waxing", name: "Waxing" }
+        ],
+        services: [
+          {
+            id: 1,
+            category: "skincare",
+            title: "Pure Balance Facial",
+            description: "A refining facial...",
+            duration: "60 min",
+            price: "$90",
+            image: "/facial.jpg",
+            bestFor: ["Oily skin"],
+            restrictions: [],
+            badge: { text: "Popular", icon: "🔥" }
+          }
+        ]
+      }
+})
+
+// ✅ draft
+const [servicesDraft, setServicesDraft] = useState(servicesData)
+
+// ✅ start editing
+const startEditingServices = () => {
+  setServicesDraft(servicesData)
+}
+
+// ✅ save changes
+const saveServices = () => {
+  setServicesData(servicesDraft)
+}
+
+// ✅ persist
+useEffect(() => {
+  localStorage.setItem("servicesData", JSON.stringify(servicesData))
+}, [servicesData])
 
 
   // ================= RENDER =================
@@ -221,6 +270,20 @@ const {
   />
 )}
 
+{/* SERVICES PANEL */}
+{editingSection === "services" && (
+  <ServicesPanel
+    data={servicesDraft}
+    setData={setServicesDraft}
+    onSave={() => {
+      saveServices()
+      setEditingSection(null)
+    }}
+    onReset={() => setServicesDraft(servicesData)}
+    onClose={() => setEditingSection(null)}
+  />
+)}
+
 
       {/* ===== MAIN SITE ===== */}
       <div className={`min-h-screen flex flex-col ${editMode ? "pt-[60px]" : ""}`}>
@@ -266,7 +329,17 @@ const {
 
             {/* ===== باقي السكاشن ===== */}
             <AnimatedSection delay={0.07}>
-              <Services />
+              <ServicesPage 
+  data={editingSection === "services" ? servicesDraft : servicesData}
+  editMode={editMode}
+  onEdit={(section) => {
+  setEditingSection(section)
+
+  if (section === "services") {
+    startEditingServices()
+  }
+}}
+/>
             </AnimatedSection>
 
             <AnimatedSection delay={0.09}>
