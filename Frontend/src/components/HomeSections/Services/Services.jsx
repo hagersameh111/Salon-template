@@ -18,9 +18,9 @@ const [activeTab, setActiveTab] = useState(categories[0]?.id || "")
 // ✅ NEW: support dynamic data with fallback to brand
   const services = data?.services || brand.data.services
 
-  const filteredServices = services.filter(
-    (service) => service.category === activeTab
-  )
+  const filteredServices = services
+  .filter((service) => service.category === activeTab)
+  .sort((a, b) => (a.order || 0) - (b.order || 0)) 
 
   return (
     <section className="relative pt-2 pb-8 overflow-hidden bg-[var(--color-bg-soft)]">

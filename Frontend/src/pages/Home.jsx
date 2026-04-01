@@ -112,8 +112,8 @@ const {
 
 // ================= SERVICES STATE =================
 const [servicesData, setServicesData] = useState(() => {
-  
   const saved = localStorage.getItem("servicesData")
+
   return saved
     ? JSON.parse(saved)
     : {
@@ -130,7 +130,9 @@ const [servicesData, setServicesData] = useState(() => {
             duration: "60 min",
             price: "$90",
             image: "/facial.jpg",
-            bestFor: ["Oily skin"],
+            notes: "",
+            order: 1,
+            bestFor: [],
             restrictions: [],
             badge: { text: "Popular", icon: "🔥" }
           }

@@ -1,16 +1,59 @@
 const ServicesPanel = ({ data, setData, onSave, onReset, onClose }) => {
   const services = data?.services || []
 
-  const updateService = (index, key, value) => {
-    const updated = [...services]
-    updated[index] = {
-      ...updated[index],
-      [key]: value,
+// ✅ UPDATE SERVICE + AUTO SORT
+const updateService = (index, key, value) => {
+  let updated = [...services]
+
+  updated[index] = {
+    ...updated[index],
+    [key]: value,
+  }
+
+  // 🔥 AUTO FIX ORDER (no duplicates, always sorted)
+  updated = updated
+    .sort((a, b) => (a.order || 0) - (b.order || 0))
+    .map((item, i) => ({
+      ...item,
+      order: i + 1 // force unique order
+    }))
+
+  setData({
+    ...data,
+    services: updated,
+  })
+}
+
+  // ADD NEW SERVICE
+  const addService = () => {
+    const newService = {
+      id: Date.now(), // unique id
+      category: "skincare", // default category
+      title: "",
+      description: "",
+      price: "",
+      duration: "",
+      image: "",
+      notes: "",
+      order: services.length + 1,
+      bestFor: [],
+      restrictions: [],
+      badge: { text: "", icon: "" }
     }
 
     setData({
       ...data,
-      services: updated,
+      services: [...services, newService]
+    })
+  }
+
+  // DELETE SERVICE
+  const deleteService = (index) => {
+    const updated = services.filter((_, i) => i !== index)
+
+    setData({
+      ...data,
+      services: updated
     })
   }
 
@@ -21,9 +64,42 @@ const ServicesPanel = ({ data, setData, onSave, onReset, onClose }) => {
 
       <div className="space-y-4">
 
+        
+
+        {/*  ADD BUTTON */}
+        <button
+          onClick={addService}
+          className="w-full bg-black text-white py-2 rounded mb-4"
+        >
+          + Add Service
+        </button>
+
         {services.map((service, index) => (
           <div key={service.id || index} className="border p-3 rounded">
 
+            {/* ✅ ORDER INPUT */}
+<input
+  type="number"
+  value={service.order || index + 1}
+  onChange={(e) =>
+    updateService(index, "order", Number(e.target.value))
+  }
+  className="w-full border p-2 mb-2"
+  placeholder="Order"
+/>
+            {/* CATEGORY SELECTOR */}
+            <select
+              value={service.category || "skincare"}
+              onChange={(e) =>
+                updateService(index, "category", e.target.value)
+              }
+              className="w-full border p-2 mb-2"
+            >
+              <option value="skincare">SkinCare</option>
+              <option value="waxing">Waxing</option>
+            </select>
+
+            {/* TITLE */}
             <input
               value={service.title || ""}
               onChange={(e) =>
@@ -33,6 +109,7 @@ const ServicesPanel = ({ data, setData, onSave, onReset, onClose }) => {
               placeholder="Title"
             />
 
+            {/* PRICE */}
             <input
               value={service.price || ""}
               onChange={(e) =>
@@ -42,6 +119,7 @@ const ServicesPanel = ({ data, setData, onSave, onReset, onClose }) => {
               placeholder="Price"
             />
 
+            {/* DESCRIPTION */}
             <textarea
               value={service.description || ""}
               onChange={(e) =>
@@ -51,20 +129,23 @@ const ServicesPanel = ({ data, setData, onSave, onReset, onClose }) => {
               placeholder="Description"
             />
 
+            {/* NOTES (VISIBLE IN CARD) */}
             <textarea
               value={service.notes || ""}
               onChange={(e) =>
                 updateService(index, "notes", e.target.value)
               }
               className="w-full border p-2 mb-2 text-sm"
-              placeholder="Internal notes..."
+              placeholder="Notes (shown in service card)..."
             />
 
+            {/* IMAGE PREVIEW */}
             <img
               src={service.image || "/placeholder.jpg"}
               className="w-full h-24 object-cover rounded mt-2 mb-2"
             />
 
+            {/* IMAGE UPLOAD */}
             <input
               type="file"
               accept="image/*"
@@ -83,11 +164,20 @@ const ServicesPanel = ({ data, setData, onSave, onReset, onClose }) => {
               className="w-full text-xs"
             />
 
+            {/* DELETE BUTTON */}
+            <button
+              onClick={() => deleteService(index)}
+              className="text-red-500 text-xs mt-2"
+            >
+              Delete Service
+            </button>
+
           </div>
         ))}
 
       </div>
 
+      {/* SAVE */}
       <button
         onClick={onSave}
         className="bg-pink-500 text-white w-full py-2 rounded mt-4 mb-2"
@@ -95,6 +185,7 @@ const ServicesPanel = ({ data, setData, onSave, onReset, onClose }) => {
         Save
       </button>
 
+      {/* RESET */}
       <button
         onClick={onReset}
         className="bg-gray-300 w-full py-2 rounded mb-2"
@@ -102,6 +193,7 @@ const ServicesPanel = ({ data, setData, onSave, onReset, onClose }) => {
         Reset
       </button>
 
+      {/* CLOSE */}
       <button
         onClick={onClose}
         className="bg-gray-200 w-full py-2 rounded"
