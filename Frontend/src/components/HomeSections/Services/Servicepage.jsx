@@ -3,23 +3,24 @@ import AddOnsSection from "./AddOnsSection"
 import PoliciesBar from "./PoliciesBar"
 
 
-const ServicesPage = ({ data, editMode, onEdit }) => {
-    return (
-    <div>
-      <div className="relative z-10">
+const ServicesPage = ({ data, addonsData, editMode, onEdit }) => {
+  return (
+    <div className="relative z-10">
 
-        {/* ✅ PASS DATA */}
-        <Services 
-  data={data}
-  editMode={editMode}
-  onEdit={onEdit}
-/>
+      <Services 
+        data={data}
+        editMode={editMode}
+        onEdit={onEdit}
+      />
 
-        <AddOnsSection />
+      <AddOnsSection
+        data={addonsData}
+        editMode={editMode}
+        onEdit={onEdit}
+      />
 
-        <PoliciesBar />
+      <PoliciesBar />
 
-      </div>
     </div>
   )
 }

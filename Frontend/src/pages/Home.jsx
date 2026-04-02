@@ -21,6 +21,7 @@ import AboutPanel from "../components/EditPanels/AboutPanel"
 import VisitPanel from "../components/EditPanels/VisitPanel"
 import FooterPanel from "../components/EditPanels/FooterPanel"
 import ServicesPanel from "../components/EditPanels/ServicesPanel"
+import AddonsPanel from "../components/EditPanels/AddonsPanel"
 
 
 // ================= LAZY SECTIONS =================
@@ -109,6 +110,43 @@ const {
   // ================= GLOBAL UI STATE =================
   const [editMode, setEditMode] = useState(false)
   const [editingSection, setEditingSection] = useState(null)
+
+
+// ================= ADDONS STATE =================
+  const [addonsData, setAddonsData] = useState(() => {
+  const saved = localStorage.getItem("addonsData")
+
+  return saved
+    ? JSON.parse(saved)
+    : {
+  backgroundImage: "/spa.jpg", // ✅ NEW
+  items: [
+    {
+      id: 1,
+      title: "LED Therapy",
+      description: "Boost collagen production",
+      duration: "15 min",
+      price: "$20"
+    }
+  ]
+}
+})
+
+const [addonsDraft, setAddonsDraft] = useState(addonsData)
+
+// persist
+useEffect(() => {
+  localStorage.setItem("addonsData", JSON.stringify(addonsData))
+}, [addonsData])
+
+// handlers
+const startEditingAddons = () => {
+  setAddonsDraft(addonsData)
+}
+
+const saveAddons = () => {
+  setAddonsData(addonsDraft)
+}
 
 // ================= SERVICES STATE =================
 const [servicesData, setServicesData] = useState(() => {
@@ -286,6 +324,20 @@ useEffect(() => {
   />
 )}
 
+{/* ADD-ONS PANEL */}
+{editingSection === "addons" && (
+  <AddonsPanel
+    data={addonsDraft}
+    setData={setAddonsDraft}
+    onSave={() => {
+      saveAddons()
+      setEditingSection(null)
+    }}
+    onReset={() => setAddonsDraft(addonsData)}
+    onClose={() => setEditingSection(null)}
+  />
+)}
+
 
       {/* ===== MAIN SITE ===== */}
       <div className={`min-h-screen flex flex-col ${editMode ? "pt-[60px]" : ""}`}>
@@ -333,14 +385,19 @@ useEffect(() => {
             <AnimatedSection delay={0.07}>
               <ServicesPage 
   data={editingSection === "services" ? servicesDraft : servicesData}
+  addonsData={editingSection === "addons" ? addonsDraft : addonsData}
   editMode={editMode}
   onEdit={(section) => {
-  setEditingSection(section)
+    setEditingSection(section)
 
-  if (section === "services") {
-    startEditingServices()
-  }
-}}
+    if (section === "services") {
+      startEditingServices()
+    }
+
+    if (section === "addons") {
+      startEditingAddons()
+    }
+  }}
 />
             </AnimatedSection>
 
