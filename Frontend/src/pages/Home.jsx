@@ -1,19 +1,22 @@
-import { lazy, Suspense, useState, useEffect } from "react"
+import { lazy, Suspense, useState } from "react"
 import { motion } from "framer-motion"
 
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
-// Home.jsx
 import ServicesPage from "../components/HomeSections/Services/Servicepage"
 
+// ================= CUSTOM STATE HOOKS =================
 import useGalleryState from "../hooks/useGalleryState"
 import useHeroState from "../hooks/useHeroState"
 import useWhyChooseState from "../hooks/useWhyChooseState"
 import useAboutState from "../hooks/useAboutState"
 import useVisitState from "../hooks/useVisitState"
 import useFooterState from "../hooks/useFooterState"
+import useServicesState from "../hooks/useServicesState"
+import useAddonsState from "../hooks/useAddonsState"
+import useReviewsState from "../hooks/useReviewsState"
 
-// Edit Panels
+// ================= EDIT PANELS =================
 import HeroPanel from "../components/EditPanels/HeroPanel"
 import WhyChoosePanel from "../components/EditPanels/WhyChoosePanel"
 import GalleryPanel from "../components/EditPanels/GalleryPanel"
@@ -24,12 +27,10 @@ import ServicesPanel from "../components/EditPanels/ServicesPanel"
 import AddonsPanel from "../components/EditPanels/AddonsPanel"
 import ReviewsPanel from "../components/EditPanels/ReviewsPanel"
 
-
-// ================= LAZY SECTIONS =================
+// ================= LAZY LOADED SECTIONS =================
 const Hero = lazy(() => import("../components/HomeSections/Hero/Hero"))
 const TrustBar = lazy(() => import("../components/HomeSections/Bars/TrustBar"))
 const WhyChoose = lazy(() => import("../components/HomeSections/WhyChooseUs/WhyChoose"))
-const Services = lazy(() => import("../components/HomeSections/Services/Servicepage"))
 const GallerySection = lazy(() => import("../components/HomeSections/Gallery/GallerySection"))
 const AboutSection = lazy(() => import("../components/HomeSections/About/AboutSection"))
 const Reviews = lazy(() => import("../components/HomeSections/Reviews/Reviews"))
@@ -40,7 +41,7 @@ const AnimatedSection = ({ children, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 28 }}
     whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.2 }}
+    viewport={{ once: true }}
     transition={{ duration: 0.55, ease: "easeOut", delay }}
   >
     {children}
@@ -49,192 +50,32 @@ const AnimatedSection = ({ children, delay = 0 }) => (
 
 // ================= MAIN COMPONENT =================
 const Home = () => {
-const {
-  galleryData,
-  galleryDraft,
-  setGalleryDraft,
-  startEditingGallery,
-  saveGallery,
-  resetGallery,
-} = useGalleryState()
-
-const {
-  heroData,
-  heroDraft,
-  setHeroDraft,
-  startEditingHero,
-  saveHero,
-} = useHeroState()
-
-const whyChooseTemplates = [
-  "/why-full.jpg",
-  "/facial2.jpg",
-  "/nails.jpg",
-]
-const {
-  whyChooseData,
-  whyChooseDraft,
-  setWhyChooseDraft,
-  startEditingWhyChoose,
-  saveWhyChoose,
-  resetWhyChoose,
-} = useWhyChooseState()
-
-
-const {
-  aboutData,
-  aboutDraft,
-  setAboutDraft,
-  startEditingAbout,
-  saveAbout,
-  resetAbout,
-} = useAboutState()
-
-const {
-  visitData,
-  visitDraft,
-  setVisitDraft,
-  startEditingVisit,
-  saveVisit,
-  resetVisit,
-} = useVisitState()
-
-const {
-  footerData,
-  footerDraft,
-  setFooterDraft,
-  startEditingFooter,
-  saveFooter,
-  resetFooter,
-} = useFooterState()
 
   // ================= GLOBAL UI STATE =================
   const [editMode, setEditMode] = useState(false)
   const [editingSection, setEditingSection] = useState(null)
 
+  // ================= SECTION STATES =================
+  const gallery = useGalleryState()
+  const hero = useHeroState()
+  const whyChoose = useWhyChooseState()
+  const about = useAboutState()
+  const visit = useVisitState()
+  const footer = useFooterState()
+  const services = useServicesState()
+  const addons = useAddonsState()
+  const reviews = useReviewsState()
 
-// ================= ADDONS STATE =================
-  const [addonsData, setAddonsData] = useState(() => {
-  const saved = localStorage.getItem("addonsData")
-
-  return saved
-    ? JSON.parse(saved)
-    : {
-  backgroundImage: "/spa.jpg", // ✅ NEW
-  items: [
-    {
-      id: 1,
-      title: "LED Therapy",
-      description: "Boost collagen production",
-      duration: "15 min",
-      price: "$20"
-    }
+  // ================= STATIC DATA =================
+  const whyChooseTemplates = [
+    "/why-full.jpg",
+    "/facial2.jpg",
+    "/nails.jpg",
   ]
-}
-})
 
-const [addonsDraft, setAddonsDraft] = useState(addonsData)
-
-// persist
-useEffect(() => {
-  localStorage.setItem("addonsData", JSON.stringify(addonsData))
-}, [addonsData])
-
-// handlers
-const startEditingAddons = () => {
-  setAddonsDraft(addonsData)
-}
-
-const saveAddons = () => {
-  setAddonsData(addonsDraft)
-}
-
-// ================= SERVICES STATE =================
-const [servicesData, setServicesData] = useState(() => {
-  const saved = localStorage.getItem("servicesData")
-
-  return saved
-    ? JSON.parse(saved)
-    : {
-        categories: [
-          { id: "skincare", name: "SkinCare" },
-          { id: "waxing", name: "Waxing" }
-        ],
-        services: [
-          {
-            id: 1,
-            category: "skincare",
-            title: "Pure Balance Facial",
-            description: "A refining facial...",
-            duration: "60 min",
-            price: "$90",
-            image: "/facial.jpg",
-            notes: "",
-            order: 1,
-            bestFor: [],
-            restrictions: [],
-            badge: { text: "Popular", icon: "🔥" }
-          }
-        ]
-      }
-})
-
-// ✅ draft
-const [servicesDraft, setServicesDraft] = useState(servicesData)
-
-// ✅ start editing
-const startEditingServices = () => {
-  setServicesDraft(servicesData)
-}
-
-// ✅ save changes
-const saveServices = () => {
-  setServicesData(servicesDraft)
-}
-
-// ✅ persist
-useEffect(() => {
-  localStorage.setItem("servicesData", JSON.stringify(servicesData))
-}, [servicesData])
-
-const [reviewsData, setReviewsData] = useState({
-  backgroundImage: "/spa.jpg",
-  items: [
-    {
-      id: 1,
-      name: "Abby",
-      content: "Amazing experience!",
-      rating: 5,
-    },
-    {
-      id: 2,
-      name: "Noor",
-      content: "Loved it so much!",
-      rating: 5,
-    }
-  ]
-})
-
-const [reviewsDraft, setReviewsDraft] = useState(reviewsData)
-
-// persist
-useEffect(() => {
-  localStorage.setItem("reviewsData", JSON.stringify(reviewsData))
-}, [reviewsData])
-
-// handlers
-const startEditingReviews = () => {
-  setReviewsDraft(reviewsData)
-}
-
-const saveReviews = () => {
-  setReviewsData(reviewsDraft)
-}
-
-  // ================= RENDER =================
   return (
     <>
-      {/* ===== Fake Login Button (enter edit mode) ===== */}
+      {/* ================= ENTER EDIT MODE ================= */}
       <button
         onClick={() => setEditMode(true)}
         className="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded z-[9999]"
@@ -242,7 +83,7 @@ const saveReviews = () => {
         Fake Login
       </button>
 
-      {/* ===== Top Edit Bar ===== */}
+      {/* ================= TOP EDIT BAR ================= */}
       {editMode && (
         <div className="fixed top-0 left-0 w-full h-[60px] bg-white shadow z-[9999] flex items-center justify-between px-6">
           <div className="font-semibold">Edit Mode</div>
@@ -255,267 +96,238 @@ const saveReviews = () => {
               Save
             </button>
 
-            <button
-              onClick={() => setEditMode(false)}
-              className="text-sm"
-            >
+            <button onClick={() => setEditMode(false)} className="text-sm">
               Exit
             </button>
           </div>
         </div>
       )}
 
-      {/* ===== HERO PANEL ===== */}
+      {/* ================= EDIT PANELS ================= */}
+
       {editingSection === "hero" && (
         <HeroPanel
-          draft={heroDraft}
-          setDraft={setHeroDraft}
+          draft={hero.heroDraft}
+          setDraft={hero.setHeroDraft}
           onSave={() => {
-            saveHero()
+            hero.saveHero()
             setEditingSection(null)
           }}
           onClose={() => setEditingSection(null)}
         />
       )}
 
-      {/* ===== WHY CHOOSE PANEL ===== */}
       {editingSection === "whyChoose" && (
         <WhyChoosePanel
-          draft={whyChooseDraft}
-          setDraft={setWhyChooseDraft}
+          draft={whyChoose.whyChooseDraft}
+          setDraft={whyChoose.setWhyChooseDraft}
           templates={whyChooseTemplates}
           onSave={() => {
-            saveWhyChoose()
+            whyChoose.saveWhyChoose()
             setEditingSection(null)
           }}
-          onReset={() => {
-            resetWhyChoose()
-          }}
+          onReset={whyChoose.resetWhyChoose}
         />
       )}
 
-      {/* ===== GALLERY PANEL ===== */}
       {editingSection === "gallery" && (
-  <GalleryPanel
-    draft={galleryDraft}
-    setDraft={setGalleryDraft}
-    onSave={() => {
-      saveGallery()
-      setEditingSection(null)
-    }}
-    onReset={resetGallery}
-  />
-)}
-{/* ABOUT PANEL */}
-{editingSection === "about" && (
-  <AboutPanel
-    draft={aboutDraft}
-    setDraft={setAboutDraft}
-    onSave={() => {
-      saveAbout()
-      setEditingSection(null)
-    }}
-    onReset={resetAbout}
-  />
-)}
- {/* VISIT PANEL */}
-{editingSection === "visit" && (
-  <VisitPanel
-    draft={visitDraft}
-    setDraft={setVisitDraft}
-    onSave={() => {
-      saveVisit()
-      setEditingSection(null)
-    }}
-    onReset={resetVisit}
-  />
-)}
+        <GalleryPanel
+          draft={gallery.galleryDraft}
+          setDraft={gallery.setGalleryDraft}
+          onSave={() => {
+            gallery.saveGallery()
+            setEditingSection(null)
+          }}
+          onReset={gallery.resetGallery}
+        />
+      )}
 
-{/* FOOTER PANEL */}
-{editingSection === "footer" && (
-  <FooterPanel
-    draft={footerDraft}
-    setDraft={setFooterDraft}
-    onSave={() => {
-      saveFooter()
-      setEditingSection(null)
-    }}
-    onReset={resetFooter}
-  />
-)}
+      {editingSection === "about" && (
+        <AboutPanel
+          draft={about.aboutDraft}
+          setDraft={about.setAboutDraft}
+          onSave={() => {
+            about.saveAbout()
+            setEditingSection(null)
+          }}
+          onReset={about.resetAbout}
+        />
+      )}
 
-{/* SERVICES PANEL */}
-{editingSection === "services" && (
-  <ServicesPanel
-    data={servicesDraft}
-    setData={setServicesDraft}
-    onSave={() => {
-      saveServices()
-      setEditingSection(null)
-    }}
-    onReset={() => setServicesDraft(servicesData)}
-    onClose={() => setEditingSection(null)}
-  />
-)}
+      {editingSection === "visit" && (
+        <VisitPanel
+          draft={visit.visitDraft}
+          setDraft={visit.setVisitDraft}
+          onSave={() => {
+            visit.saveVisit()
+            setEditingSection(null)
+          }}
+          onReset={visit.resetVisit}
+        />
+      )}
 
-{/* ADD-ONS PANEL */}
-{editingSection === "addons" && (
-  <AddonsPanel
-    data={addonsDraft}
-    setData={setAddonsDraft}
-    onSave={() => {
-      saveAddons()
-      setEditingSection(null)
-    }}
-    onReset={() => setAddonsDraft(addonsData)}
-    onClose={() => setEditingSection(null)}
-  />
-)}
+      {editingSection === "footer" && (
+        <FooterPanel
+          draft={footer.footerDraft}
+          setDraft={footer.setFooterDraft}
+          onSave={() => {
+            footer.saveFooter()
+            setEditingSection(null)
+          }}
+          onReset={footer.resetFooter}
+        />
+      )}
 
+      {editingSection === "services" && (
+        <ServicesPanel
+          data={services.servicesDraft}
+          setData={services.setServicesDraft}
+          onSave={() => {
+            services.saveServices()
+            setEditingSection(null)
+          }}
+          onReset={() => services.setServicesDraft(services.servicesData)}
+          onClose={() => setEditingSection(null)}
+        />
+      )}
 
-{editingSection === "reviews" && (
-  <ReviewsPanel
-    data={reviewsDraft}
-    setData={setReviewsDraft}
-    onSave={() => {
-      saveReviews()
-      setEditingSection(null)
-    }}
-    onReset={() => setReviewsDraft(reviewsData)}
-    onClose={() => setEditingSection(null)}
-  />
-)}
+      {editingSection === "addons" && (
+        <AddonsPanel
+          data={addons.addonsDraft}
+          setData={addons.setAddonsDraft}
+          onSave={() => {
+            addons.saveAddons()
+            setEditingSection(null)
+          }}
+          onReset={() => addons.setAddonsDraft(addons.addonsData)}
+          onClose={() => setEditingSection(null)}
+        />
+      )}
 
+      {editingSection === "reviews" && (
+        <ReviewsPanel
+          data={reviews.reviewsDraft}
+          setData={reviews.setReviewsDraft}
+          onSave={() => {
+            reviews.saveReviews()
+            setEditingSection(null)
+          }}
+          onReset={() => reviews.setReviewsDraft(reviews.reviewsData)}
+          onClose={() => setEditingSection(null)}
+        />
+      )}
 
-      {/* ===== MAIN SITE ===== */}
+      {/* ================= MAIN SITE ================= */}
       <div className={`min-h-screen flex flex-col ${editMode ? "pt-[60px]" : ""}`}>
         <Navbar />
 
         <main className="flex-1">
           <Suspense fallback={<div className="min-h-[60vh]" />}>
 
-            {/* ===== HERO ===== */}
+            {/* HERO */}
             <AnimatedSection>
               <Hero
                 editMode={editMode}
-                heroData={editingSection === "hero" ? heroDraft : heroData}
+                heroData={editingSection === "hero" ? hero.heroDraft : hero.heroData}
                 onEdit={(section) => {
                   setEditingSection(section)
-
-                  if (section === "hero") {
-                    startEditingHero()
-                  }
+                  if (section === "hero") hero.startEditingHero()
                 }}
               />
             </AnimatedSection>
 
-            {/* ===== TRUST BAR ===== */}
+            {/* TRUST BAR */}
             <AnimatedSection delay={0.03}>
               <TrustBar />
             </AnimatedSection>
 
-            {/* ===== WHY CHOOSE ===== */}
+            {/* WHY CHOOSE */}
             <AnimatedSection delay={0.05}>
               <WhyChoose
                 editMode={editMode}
-                data={editingSection === "whyChoose" ? whyChooseDraft : whyChooseData}
+                data={editingSection === "whyChoose" ? whyChoose.whyChooseDraft : whyChoose.whyChooseData}
                 onEdit={(section) => {
                   setEditingSection(section)
-
-                  if (section === "whyChoose") {
-                    startEditingWhyChoose()
-                  }
+                  if (section === "whyChoose") whyChoose.startEditingWhyChoose()
                 }}
               />
             </AnimatedSection>
 
-            {/* ===== باقي السكاشن ===== */}
+            {/* SERVICES + ADDONS */}
             <AnimatedSection delay={0.07}>
-              <ServicesPage 
-  data={editingSection === "services" ? servicesDraft : servicesData}
-  addonsData={editingSection === "addons" ? addonsDraft : addonsData}
-  editMode={editMode}
-  onEdit={(section) => {
-    setEditingSection(section)
+              <ServicesPage
+                data={editingSection === "services" ? services.servicesDraft : services.servicesData}
+                addonsData={editingSection === "addons" ? addons.addonsDraft : addons.addonsData}
+                editMode={editMode}
+                onEdit={(section) => {
+                  setEditingSection(section)
 
-    if (section === "services") {
-      startEditingServices()
-    }
-
-    if (section === "addons") {
-      startEditingAddons()
-    }
-  }}
-/>
+                  if (section === "services") services.startEditingServices()
+                  if (section === "addons") addons.startEditingAddons()
+                }}
+              />
             </AnimatedSection>
 
+            {/* GALLERY */}
             <AnimatedSection delay={0.09}>
-            <GallerySection
-  editMode={editMode}
-  data={editingSection === "gallery" ? galleryDraft : galleryData}
-  onEdit={(section) => {
-    setEditingSection(section)
-
-if (section === "gallery") {
-  startEditingGallery()
-}
-  }}
-/>
+              <GallerySection
+                editMode={editMode}
+                data={editingSection === "gallery" ? gallery.galleryDraft : gallery.galleryData}
+                onEdit={(section) => {
+                  setEditingSection(section)
+                  if (section === "gallery") gallery.startEditingGallery()
+                }}
+              />
             </AnimatedSection>
 
+            {/* ABOUT */}
             <AnimatedSection delay={0.11}>
               <AboutSection
-  editMode={editMode}
-  data={editingSection === "about" ? aboutDraft : aboutData}
-  onEdit={(section) => {
-    setEditingSection(section)
-
-    if (section === "about") {
-      startEditingAbout()
-    }
-  }}
-/>
+                editMode={editMode}
+                data={editingSection === "about" ? about.aboutDraft : about.aboutData}
+                onEdit={(section) => {
+                  setEditingSection(section)
+                  if (section === "about") about.startEditingAbout()
+                }}
+              />
             </AnimatedSection>
 
+            {/* REVIEWS */}
             <AnimatedSection delay={0.13}>
               <Reviews
-  data={editingSection === "reviews" ? reviewsDraft : reviewsData}
-  editMode={editMode}
-  onEdit={(section) => {
-    setEditingSection(section)
-
-    if (section === "reviews") {
-      startEditingReviews()
-    }
-  }}
-/>
+                data={editingSection === "reviews" ? reviews.reviewsDraft : reviews.reviewsData}
+                editMode={editMode}
+                onEdit={(section) => {
+                  setEditingSection(section)
+                  if (section === "reviews") reviews.startEditingReviews()
+                }}
+              />
             </AnimatedSection>
 
+            {/* VISIT */}
             <AnimatedSection delay={0.15}>
               <VisitSection
-  editMode={editMode}
-  data={editingSection === "visit" ? visitDraft : visitData}
-  onEdit={(section) => {
-    setEditingSection(section)
-    if (section === "visit") startEditingVisit()
-  }}
-/>
+                editMode={editMode}
+                data={editingSection === "visit" ? visit.visitDraft : visit.visitData}
+                onEdit={(section) => {
+                  setEditingSection(section)
+                  if (section === "visit") visit.startEditingVisit()
+                }}
+              />
             </AnimatedSection>
 
           </Suspense>
         </main>
 
+        {/* FOOTER */}
         <Footer
-  editMode={editMode}
-  data={editingSection === "footer" ? footerDraft : footerData}
-  onEdit={(section) => {
-    setEditingSection(section)
-
-    if (section === "footer") {
-      startEditingFooter()
-    }
-  }}
-/>
+          editMode={editMode}
+          data={editingSection === "footer" ? footer.footerDraft : footer.footerData}
+          onEdit={(section) => {
+            setEditingSection(section)
+            if (section === "footer") footer.startEditingFooter()
+          }}
+        />
       </div>
     </>
   )
