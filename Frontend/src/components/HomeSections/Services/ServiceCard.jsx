@@ -5,28 +5,26 @@ const ServiceCard = ({ service }) => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
 
-// ✅ NEW: support dynamic data (fallback to translation if missing)
+  const title = service.title ?? t(`services.${service.id}.title`)
+  const description = service.description ?? t(`services.${service.id}.desc`)
+  const duration = service.duration ?? t(`services.${service.id}.duration`)
+  const price = service.price ?? t(`services.${service.id}.price`)
 
-const title = service.title ?? t(`services.${service.id}.title`)
-const description = service.description ?? t(`services.${service.id}.desc`)
-const duration = service.duration ?? t(`services.${service.id}.duration`)
-const price = service.price ?? t(`services.${service.id}.price`)
+  const bestFor =
+    service.bestFor ??
+    t(`services.${service.id}.bestFor`, { returnObjects: true })
 
-const bestFor =
-  service.bestFor ??
-  t(`services.${service.id}.bestFor`, { returnObjects: true })
+  const restrictions =
+    service.restrictions ||
+    t(`services.${service.id}.restrictions`, { returnObjects: true })
 
-const restrictions =
-  service.restrictions ||
-  t(`services.${service.id}.restrictions`, { returnObjects: true })
+  const badgeText =
+    service.badge?.text ||
+    t(`services.${service.id}.badge.text`)
 
-const badgeText =
-  service.badge?.text ||
-  t(`services.${service.id}.badge.text`)
-
-const badgeIcon =
-  service.badge?.icon ||
-  t(`services.${service.id}.badge.icon`)
+  const badgeIcon =
+    service.badge?.icon ||
+    t(`services.${service.id}.badge.icon`)
 
   const handleClick = () => {
     if (window.innerWidth < 1024) {
@@ -74,6 +72,7 @@ const badgeIcon =
         <div>
           <h3 className="text-[16px] lg:text-3xl font-semibold mb-4">{title}</h3>
 
+          {/* DESCRIPTION */}
           <p className="text-[12px] lg:text-sm leading-relaxed mb-4">
             {(description || "").split("\n").map((line, lineIndex) => (
               <span key={lineIndex} className="block">
@@ -85,17 +84,19 @@ const badgeIcon =
                   ) : (
                     <span key={partIndex}>{part}</span>
                   )
-                )}{/* ✅ NEW: Notes inside service */}
-{service.notes && (
-  <div className="border-t border-white/30 pt-3 mt-3">
-    <p className="text-[11px] lg:text-xs text-gray-300 italic">
-      {service.notes}
-    </p>
-  </div>
-)}
+                )}
               </span>
             ))}
           </p>
+
+          {/* ✅ FIX: notes برا الـ p */}
+          {service.notes && (
+            <div className="border-t border-white/30 pt-3 mt-3">
+              <p className="text-[11px] lg:text-xs text-gray-300 italic">
+                {service.notes}
+              </p>
+            </div>
+          )}
 
           {badgeText && badgeText !== `services.${service.id}.badge.text` && (
             <div className="bg-[var(--color-primary-soft)] text-black text-[12px] lg:text-sm px-4 py-2 rounded-full inline-flex items-center gap-2 mb-4">
