@@ -22,6 +22,7 @@ import VisitPanel from "../components/EditPanels/VisitPanel"
 import FooterPanel from "../components/EditPanels/FooterPanel"
 import ServicesPanel from "../components/EditPanels/ServicesPanel"
 import AddonsPanel from "../components/EditPanels/AddonsPanel"
+import ReviewsPanel from "../components/EditPanels/ReviewsPanel"
 
 
 // ================= LAZY SECTIONS =================
@@ -196,6 +197,39 @@ useEffect(() => {
   localStorage.setItem("servicesData", JSON.stringify(servicesData))
 }, [servicesData])
 
+const [reviewsData, setReviewsData] = useState({
+  backgroundImage: "/spa.jpg",
+  items: [
+    {
+      id: 1,
+      name: "Abby",
+      content: "Amazing experience!",
+      rating: 5,
+    },
+    {
+      id: 2,
+      name: "Noor",
+      content: "Loved it so much!",
+      rating: 5,
+    }
+  ]
+})
+
+const [reviewsDraft, setReviewsDraft] = useState(reviewsData)
+
+// persist
+useEffect(() => {
+  localStorage.setItem("reviewsData", JSON.stringify(reviewsData))
+}, [reviewsData])
+
+// handlers
+const startEditingReviews = () => {
+  setReviewsDraft(reviewsData)
+}
+
+const saveReviews = () => {
+  setReviewsData(reviewsDraft)
+}
 
   // ================= RENDER =================
   return (
@@ -339,6 +373,20 @@ useEffect(() => {
 )}
 
 
+{editingSection === "reviews" && (
+  <ReviewsPanel
+    data={reviewsDraft}
+    setData={setReviewsDraft}
+    onSave={() => {
+      saveReviews()
+      setEditingSection(null)
+    }}
+    onReset={() => setReviewsDraft(reviewsData)}
+    onClose={() => setEditingSection(null)}
+  />
+)}
+
+
       {/* ===== MAIN SITE ===== */}
       <div className={`min-h-screen flex flex-col ${editMode ? "pt-[60px]" : ""}`}>
         <Navbar />
@@ -430,7 +478,17 @@ if (section === "gallery") {
             </AnimatedSection>
 
             <AnimatedSection delay={0.13}>
-              <Reviews />
+              <Reviews
+  data={editingSection === "reviews" ? reviewsDraft : reviewsData}
+  editMode={editMode}
+  onEdit={(section) => {
+    setEditingSection(section)
+
+    if (section === "reviews") {
+      startEditingReviews()
+    }
+  }}
+/>
             </AnimatedSection>
 
             <AnimatedSection delay={0.15}>
