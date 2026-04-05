@@ -1,19 +1,29 @@
 import Container from "../../ui/Container"
-import { brand } from "../../../config/brand"
 import { useTranslation } from "react-i18next"
 
-const AddOnsSection = () => {
+const AddOnsSection = ({ data, editMode, onEdit }) => {
   const { t } = useTranslation()
-  const addonsData = brand.data.addons
+  const addonsData = data
 
   return (
     <section className="relative w-full">
 
-      {/* Background */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${addonsData.backgroundImage})` }}
-      />
+      {editMode && (
+  <button
+    onClick={() => onEdit("addons")}
+    className="absolute top-4 left-4 bg-white px-3 py-1 rounded shadow text-sm z-20"
+  >
+    ✏ Edit
+  </button>
+)}
+
+      {/* BACKGROUND */}
+<div
+  className="absolute inset-0 bg-cover bg-center"
+  style={{
+    backgroundImage: `url(${data?.backgroundImage || "/spa.jpg"})`
+  }}
+/>
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/75" />
@@ -29,10 +39,11 @@ const AddOnsSection = () => {
 
             {addonsData.items.map((item) => {
 
-              const title = t(`addons.${item.id}.title`)
-              const desc = t(`addons.${item.id}.desc`)
-              const duration = t(`addons.${item.id}.duration`)
-              const price = t(`addons.${item.id}.price`)
+      // USE DIRECT DATA (no translation)
+      const title = item.title || ""
+      const desc = item.description || ""
+      const duration = item.duration || ""
+      const price = item.price || ""
 
               return (
                 <div

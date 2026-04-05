@@ -1,49 +1,18 @@
 import { useState, useEffect } from "react"
 import Container from "../../ui/Container"
-import { brand } from "../../../config/brand"
-import { apiUrl } from "../../../config/api"
 import { useTranslation } from "react-i18next"
-// import AddReview from "./AddReview"
 import "./reviews-mobile.css"
 
-const Reviews = () => {
+const Reviews = ({ data, editMode, onEdit }) => {
   const { t, i18n } = useTranslation()
   const isRTL = i18n.language === "ar"
 
-  const reviewsData = brand.data.reviews
+  // ✅ USE PASSED DATA (CMS STYLE)
+  const reviewsData = data
+  const reviews = data?.items || []
 
-  const [reviews, setReviews] = useState([])
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)
-  // const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const fallbackReviews = reviewsData.items.map((item) => ({
-    id: item.id,
-    name: t(`reviews.${item.id}.name`),
-    content: t(`reviews.${item.id}.text`),
-    rating: Number(t(`reviews.${item.id}.rating`)),
-  }))
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const response = await fetch(apiUrl("/api/reviews/"))
-        if (!response.ok) throw new Error("Failed to fetch reviews")
-        const data = await response.json()
-
-        if (Array.isArray(data) && data.length > 0) {
-          setReviews(data)
-        } else {
-          setReviews(fallbackReviews)
-        }
-      } catch (error) {
-        console.error("Error fetching reviews:", error)
-        setReviews(fallbackReviews)
-      }
-    }
-
-    fetchReviews()
-  }, [t])
 
   useEffect(() => {
     if (paused || reviews.length === 0) return
@@ -61,7 +30,18 @@ const Reviews = () => {
   const secondReview = reviews[(current + 1) % reviews.length]
 
   return (
-    <section className="py-20 lg:py-32 bg-[#FFFEFC] overflow-hidden">
+    <section className="py-20 lg:py-32 bg-[#FFFEFC] overflow-hidden relative">
+
+      {/* ✅ EDIT BUTTON */}
+      {editMode && (
+        <button
+  onClick={() => onEdit("reviews")}
+  className="absolute top-4 left-4 bg-white px-3 py-1 rounded shadow text-sm z-[999]"
+>
+  ✏ Edit
+</button>
+      )}
+
       <Container>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center">
@@ -75,16 +55,6 @@ const Reviews = () => {
             <p className="text-lg sm:text-xl lg:text-[36px] leading-[1.6] text-[#7A7472] max-w-[500px] mx-auto lg:mx-0">
               {t("reviews.subtitle")}
             </p>
-
-            {/* Leave Review Button Disabled */}
-            {/*
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="mt-8 lg:mt-10 bg-[var(--color-primary)] text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-full hover:opacity-90 transition text-sm sm:text-base"
-            >
-              {t("reviews.leaveButton")}
-            </button>
-            */}
           </div>
 
           {/* RIGHT */}
@@ -94,7 +64,8 @@ const Reviews = () => {
             <div className="reviews-mobile-wrapper relative w-full lg:hidden">
 
               <img
-                src={reviewsData.backgroundImage}
+                key={reviewsData?.backgroundImage} // ✅ add key to force re-render on image change
+                src={reviewsData?.backgroundImage}
                 alt=""
                 className="reviews-mobile-bg w-full object-cover rounded-[30px]"
               />
@@ -110,7 +81,8 @@ const Reviews = () => {
             <div className="hidden lg:block relative w-[520px] h-[800px]">
 
               <img
-                src={reviewsData.backgroundImage}
+                key={reviewsData?.backgroundImage} // ✅ add key to force re-render on image change
+                src={reviewsData?.backgroundImage}
                 alt=""
                 className="w-full h-full object-cover rounded-[40px]"
               />
@@ -136,41 +108,11 @@ const Reviews = () => {
         </div>
 
       </Container>
-
-      {/* Review Modal Disabled */}
-      {/*
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setIsModalOpen(false)}
-          />
-
-          <div className="relative bg-white p-6 sm:p-10 rounded-3xl w-[500px] max-w-[90%] z-10 shadow-2xl">
-
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-black"
-            >
-              ✕
-            </button>
-
-            <h3 className="text-xl sm:text-2xl font-semibold mb-6 text-center text-[var(--color-primary-soft)]">
-              {t("reviews.modalTitle")}
-            </h3>
-
-            <AddReview onSuccess={() => setIsModalOpen(false)} />
-
-          </div>
-
-        </div>
-      )}
-      */}
     </section>
   )
 }
 
+// ================= CARD =================
 const ReviewCard = ({ review, position, setPaused, isRTL }) => {
 
   const positionStyles =
@@ -195,11 +137,11 @@ const ReviewCard = ({ review, position, setPaused, isRTL }) => {
       hover:scale-105`}
     >
 
-      <h4 className={`text-xl lg:text-2xl font-semibold mb-4 lg:mb-4 ${isRTL ? "text-right" : ""}`}>
+      <h4 className={`text-xl lg:text-2xl font-semibold mb-4 ${isRTL ? "text-right" : ""}`}>
         {review.name}
       </h4>
 
-      <p className={`text-sm sm:text-base leading-relaxed mb-2 lg:mb-2 ${isRTL ? "text-right" : ""}`}>
+      <p className={`text-sm sm:text-base leading-relaxed mb-2 ${isRTL ? "text-right" : ""}`}>
         {review.content}
       </p>
 

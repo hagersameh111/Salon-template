@@ -1,32 +1,22 @@
-import { useEffect, useState } from "react"
 import Container from "../../ui/Container"
 import { useTranslation } from "react-i18next"
-import { brand } from "../../../config/brand"
-import { apiUrl } from "../../../config/api"
 
-const GallerySection = () => {
+const GallerySection = ({ editMode, data, onEdit }) => {
   const { t } = useTranslation()
-  const fallbackImages = brand.data.galleryFallback
-  const [images, setImages] = useState(fallbackImages)
-
-  useEffect(() => {
-    fetch(apiUrl("/gallery/"))
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setImages(data)
-        } else {
-          setImages(fallbackImages)
-        }
-      })
-      .catch(err => {
-        console.error(err)
-        setImages(fallbackImages)
-      })
-  }, [])
 
   return (
-    <section className="py-16 sm:py-20 lg:py-24 bg-white">
+    <section className="py-16 sm:py-20 lg:py-24 bg-white relative">
+
+      {/* EDIT BUTTON */}
+      {editMode && (
+        <button
+          onClick={() => onEdit("gallery")}
+          className="absolute top-4 left-4 bg-white px-3 py-1 rounded shadow text-sm z-20"
+        >
+          ✏ Edit
+        </button>
+      )}
+
       <Container>
 
         {/* HEADER */}
@@ -37,7 +27,7 @@ const GallerySection = () => {
           </h2>
 
           <a
-            href={t("gallery.instagramUrl")}
+            href={data.instagramUrl} // ✅ dynamic from panel
             target="_blank"
             rel="noopener noreferrer"
             className="bg-[var(--color-secondary)] text-[var(--color-text-main)] px-6 sm:px-8 py-2.5 sm:py-3 rounded-full flex items-center gap-3 hover:opacity-90 transition text-sm sm:text-base"
@@ -55,7 +45,7 @@ const GallerySection = () => {
         {/* GRID */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
 
-          {images.map((item, index) => (
+          {data?.images?.map((item, index) => (
             <div
               key={index}
               className="aspect-square rounded-[18px] sm:rounded-[24px] overflow-hidden group cursor-pointer"

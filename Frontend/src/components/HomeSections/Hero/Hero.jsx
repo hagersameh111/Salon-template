@@ -6,12 +6,14 @@ import { useTranslation } from "react-i18next"
 import "./hero-responsive.css"
 import MobileHero from "./MobileHero"
 
-const Hero = () => {
+const Hero = ({ editMode, heroData, onEdit }) => {
   const [current, setCurrent] = useState(0)
   const heroSlides = brand.data.heroSlides
   const { t, i18n } = useTranslation()
+
   const isRTL = i18n.language === "ar"
 
+  // Slider logic (unchanged)
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) => (prev + 1) % heroSlides.length)
@@ -29,6 +31,18 @@ const Hero = () => {
       <section
         className={`hidden lg:block relative bg-[var(--color-bg-main)] overflow-hidden ${isRTL ? "hero-force-ltr" : ""}`}
       >
+        {/* EDIT BUTTON (only appears in edit mode) */}
+        {editMode && (
+<button
+  onClick={() => {
+  onEdit("hero")
+}} //  tell Home to edit hero
+  className="absolute top-4 left-4 bg-white px-3 py-1 rounded shadow text-sm z-20"
+>
+  ✏ Edit
+</button>
+        )}
+
         <div
           className="absolute inset-0 bg-repeat bg-[length:511px] opacity-[1] pointer-events-none"
           style={{ backgroundImage: "url('/overlay.svg')" }}
@@ -45,11 +59,11 @@ const Hero = () => {
                 }`}
               >
                 <h1 className="font-semibold text-4xl lg:text-[56px] xl:text-[68px] leading-[1.05] text-[var(--color-accent)] whitespace-pre-line mb-4">
-                  {t("hero.title")}
+                  {heroData.title}
                 </h1>
 
                 <p className="font-extralight text-base lg:text-xl xl:text-[24px] text-[var(--color-text-main)] max-w-[760px] mx-auto lg:mx-0 mb-8">
-                  {t("hero.description")}
+                  {heroData.description}
                 </p>
 
                 <div className="inline-flex flex-col items-stretch w-fit">
@@ -62,7 +76,7 @@ const Hero = () => {
                     <Button className="w-full">
                       <div className="flex items-center gap-3 justify-center">
                         <img src="/calendar.svg" className="w-5 h-5" />
-                        {t("hero.button")}
+                        {heroData.button}
                       </div>
                     </Button>
                   </a>

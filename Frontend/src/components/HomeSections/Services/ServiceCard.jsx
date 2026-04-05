@@ -5,14 +5,26 @@ const ServiceCard = ({ service }) => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
 
-  const title = t(`services.${service.id}.title`)
-  const description = t(`services.${service.id}.desc`)
-  const duration = t(`services.${service.id}.duration`)
-  const price = t(`services.${service.id}.price`)
-  const bestFor = t(`services.${service.id}.bestFor`, { returnObjects: true })
-  const restrictions = t(`services.${service.id}.restrictions`, { returnObjects: true })
-  const badgeText = t(`services.${service.id}.badge.text`)
-  const badgeIcon = t(`services.${service.id}.badge.icon`)
+  const title = service.title ?? t(`services.${service.id}.title`)
+  const description = service.description ?? t(`services.${service.id}.desc`)
+  const duration = service.duration ?? t(`services.${service.id}.duration`)
+  const price = service.price ?? t(`services.${service.id}.price`)
+
+  const bestFor =
+    service.bestFor ??
+    t(`services.${service.id}.bestFor`, { returnObjects: true })
+
+  const restrictions =
+    service.restrictions ||
+    t(`services.${service.id}.restrictions`, { returnObjects: true })
+
+  const badgeText =
+    service.badge?.text ||
+    t(`services.${service.id}.badge.text`)
+
+  const badgeIcon =
+    service.badge?.icon ||
+    t(`services.${service.id}.badge.icon`)
 
   const handleClick = () => {
     if (window.innerWidth < 1024) {
@@ -28,7 +40,7 @@ const ServiceCard = ({ service }) => {
 
       {/* IMAGE */}
       <img
-        src={service.image}
+        src={service.image || "/placeholder.jpg"}
         alt=""
         className="w-full h-[420px] sm:h-[460px] lg:h-[500px] object-cover transition-transform duration-700 lg:group-hover:scale-105"
       />
@@ -60,8 +72,9 @@ const ServiceCard = ({ service }) => {
         <div>
           <h3 className="text-[16px] lg:text-3xl font-semibold mb-4">{title}</h3>
 
+          {/* DESCRIPTION */}
           <p className="text-[12px] lg:text-sm leading-relaxed mb-4">
-            {description.split("\n").map((line, lineIndex) => (
+            {(description || "").split("\n").map((line, lineIndex) => (
               <span key={lineIndex} className="block">
                 {line.split(/(\$\d+)/g).map((part, partIndex) =>
                   /^\$\d+$/.test(part) ? (
@@ -75,6 +88,15 @@ const ServiceCard = ({ service }) => {
               </span>
             ))}
           </p>
+
+          {/* ✅ FIX: notes برا الـ p */}
+          {service.notes && (
+            <div className="border-t border-white/30 pt-3 mt-3">
+              <p className="text-[11px] lg:text-xs text-gray-300 italic">
+                {service.notes}
+              </p>
+            </div>
+          )}
 
           {badgeText && badgeText !== `services.${service.id}.badge.text` && (
             <div className="bg-[var(--color-primary-soft)] text-black text-[12px] lg:text-sm px-4 py-2 rounded-full inline-flex items-center gap-2 mb-4">

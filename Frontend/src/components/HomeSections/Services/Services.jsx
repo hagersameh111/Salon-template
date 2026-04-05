@@ -4,18 +4,34 @@ import { brand } from "../../../config/brand"
 import ServiceCard from "./ServiceCard"
 import { useTranslation } from "react-i18next"
 
-const Services = () => {
-  const { t } = useTranslation()
-  const [activeTab, setActiveTab] = useState("skincare")
-  const services = brand.data.services
+const Services = ({ data, editMode, onEdit }) => {
+    const { t } = useTranslation()
 
-  const filteredServices = services.filter(
-    (service) => service.category === activeTab
-  )
+  // ✅ dynamic categories with fallback
+const categories = data?.categories || [
+  { id: "skincare", name: "SkinCare" },
+  { id: "waxing", name: "Waxing" }
+]
+
+const [activeTab, setActiveTab] = useState(categories[0]?.id || "")
+
+// ✅ NEW: support dynamic data with fallback to brand
+  const services = data?.services || brand.data.services
+
+  const filteredServices = services
+  .filter((service) => service.category === activeTab)
+  .sort((a, b) => (a.order || 0) - (b.order || 0)) 
 
   return (
     <section className="relative pt-2 pb-8 overflow-hidden bg-[var(--color-bg-soft)]">
-
+{editMode && (
+  <button
+    onClick={() => onEdit("services")}
+    className="absolute top-4 left-4 bg-white px-3 py-1 rounded shadow text-sm z-20"
+  >
+    ✏ Edit
+  </button>
+)}
       {/* GRADIENT */}
       <div
         className="
@@ -56,27 +72,20 @@ const Services = () => {
 
             <div className="flex justify-center lg:justify-end gap-3 sm:gap-6 flex-wrap">
 
-              <button
-                onClick={() => setActiveTab("skincare")}
-                className={`px-5 sm:px-8 py-2.5 sm:py-3 rounded-[19px] font-medium transition text-[12px] sm:text-base ${
-                  activeTab === "skincare"
-                    ? "bg-[var(--color-primary-soft)] text-white"
-                    : "text-gray-500"
-                }`}
-              >
-                {t("servicesTabs.skincare")}
-              </button>
+              {categories.map((cat) => (
+  <button
+    key={cat.id}
+    onClick={() => setActiveTab(cat.id)}
+    className={`px-5 sm:px-8 py-2.5 sm:py-3 rounded-[19px] font-medium transition text-[12px] sm:text-base ${
+      activeTab === cat.id
+        ? "bg-[var(--color-primary-soft)] text-white"
+        : "text-gray-500"
+    }`}
+  >
+    {t(`servicesTabs.${cat.id}`) || cat.name}
+  </button>
+))}
 
-              <button
-                onClick={() => setActiveTab("waxing")}
-                className={`px-5 sm:px-8 py-2.5 sm:py-3 rounded-[19px] font-medium transition text-[12px] sm:text-base ${
-                  activeTab === "waxing"
-                    ? "bg-[var(--color-primary-soft)] text-white"
-                    : "text-gray-500"
-                }`}
-              >
-                {t("servicesTabs.waxing")}
-              </button>
 
             </div>
           </div>
