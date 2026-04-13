@@ -1,12 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
-import {
-  Menu,
-  Search,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Menu, Search, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { getSalons } from "../api/salons";
 
 export default function SalonOverview() {
   const [params, setParams] = useSearchParams();
@@ -19,32 +14,26 @@ export default function SalonOverview() {
   const status = params.get("status") || "All";
   const plan = params.get("plan") || "All";
 
-  // ✅ UPDATE FILTER
   const updateFilter = (key, value) => {
     params.set(key, value === "All" ? "" : value);
     setParams(params);
-    setPage(1); // reset page when filter changes
+    setPage(1);
   };
 
-  // ✅ BUILD URL
-  const buildUrl = () => {
-    let url = `http://127.0.0.1:8000/api/salons/?page=${page}&`;
-
-    if (status !== "All") url += `status=${status}&`;
-    if (plan !== "All") url += `subscription=${plan}&`;
-    if (search) url += `search=${search}&`;
-
-    return url;
-  };
-
-  // ✅ FETCH DATA
   useEffect(() => {
-    fetch(buildUrl())
-      .then((res) => res.json())
-      .then((data) => {
-        setSalons(data.results);
-        setCount(data.count);
+    const fetchData = async () => {
+      const data = await getSalons({
+        page,
+        status: status !== "All" ? status : undefined,
+        subscription: plan !== "All" ? plan : undefined,
+        search,
       });
+
+      setSalons(data.results || []);
+      setCount(data.count || 0);
+    };
+
+    fetchData();
   }, [status, plan, page, search]);
 
   return (

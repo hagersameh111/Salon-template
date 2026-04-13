@@ -3,70 +3,121 @@ import { useEffect, useState } from "react";
 import { ExternalLink, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 
+import {
+  getSalon,
+  activateSalon,
+  suspendSalon,
+  deactivateSalon,
+  deleteSalon,
+  renewSalon,
+} from "../api/salons";
+
 export default function SalonDetails() {
   const { id } = useParams();
   const [salon, setSalon] = useState(null);
 
-  //  FETCH DATA
+  const fetchSalon = async () => {
+    const data = await getSalon(id);
+    setSalon(data);
+  };
+
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/salons/${id}/`)
-      .then((res) => res.json())
-      .then((data) => setSalon(data));
+    fetchSalon();
   }, [id]);
 
-  //  UPDATE STATUS
-  const updateStatus = async (newStatus) => {
-    await fetch(`http://127.0.0.1:8000/api/salons/${id}/`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus }),
-    });
-
-    setSalon({ ...salon, status: newStatus });
-
-    toast.success(`Salon ${newStatus}`);
+  // ✅ TOGGLE ACTIVE / SUSPEND
+  const toggleSuspend = async () => {
+    if (salon.status === "Active") {
+      await suspendSalon(id);
+    } else {
+      await activateSalon(id);
+    }
+    fetchSalon();
   };
 
-  //  DELETE CONFIRM
-  const confirmDelete = () => {
-    toast(
-      ({ closeToast }) => (
-        <div className="text-center">
-          <p className="mb-3">Are you sure?</p>
-          <div className="flex justify-center gap-3">
-            <button
-              onClick={() => {
-                handleDelete();
-                closeToast();
-              }}
-              className="bg-red-500 text-white px-4 py-1 rounded"
-            >
-              Yes
-            </button>
-            <button
-              onClick={closeToast}
-              className="bg-gray-300 px-4 py-1 rounded"
-            >
-              No
-            </button>
-          </div>
+  // ✅ DEACTIVATE CONFIRMATION
+  const confirmDeactivate = () => {
+    toast(({ closeToast }) => (
+      <div className="text-center">
+        <p className="mb-3">
+          Are you sure? It will be permanently deleted after 30 days if no action is taken.
+        </p>
+
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={async () => {
+              await deactivateSalon(id);
+              closeToast();
+              fetchSalon();
+            }}
+            className="bg-red-500 text-white px-4 py-1 rounded"
+          >
+            Yes
+          </button>
+
+          <button
+            onClick={closeToast}
+            className="bg-gray-300 px-4 py-1 rounded"
+          >
+            No
+          </button>
         </div>
-      ),
-      { autoClose: false }
-    );
+      </div>
+    ), { autoClose: false });
   };
 
-  // DELETE
-  const handleDelete = async () => {
-    await fetch(`http://127.0.0.1:8000/api/salons/${id}/`, {
-      method: "DELETE",
-    });
+  // ✅ DELETE CONFIRM
+  const confirmDelete = () => {
+    toast(({ closeToast }) => (
+      <div className="text-center">
+        <p className="mb-3">Are you sure?</p>
 
-    toast.success("Deleted");
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={async () => {
+              await deleteSalon(id);
+              closeToast();
+              fetchSalon();
+            }}
+            className="bg-orange-500 text-white px-4 py-1 rounded"
+          >
+            Yes
+          </button>
 
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 1000);
+          <button
+            onClick={closeToast}
+            className="bg-gray-300 px-4 py-1 rounded"
+          >
+            No
+          </button>
+        </div>
+      </div>
+    ), { autoClose: false });
+  };
+
+  // ✅ RENEW POPUP
+  const openRenewPopup = () => {
+    toast(({ closeToast }) => (
+      <div className="text-center">
+        <p className="mb-3">Select renewal plan</p>
+
+        <div className="flex gap-2 justify-center">
+          {["3M", "6M", "9M", "12M"].map((plan) => (
+            <button
+              key={plan}
+              onClick={async () => {
+                await renewSalon(id, plan);
+                closeToast();
+                fetchSalon();
+              }}
+              className="bg-[#C79A3B] text-white px-3 py-1 rounded"
+            >
+              {plan}
+            </button>
+          ))}
+        </div>
+      </div>
+    ), { autoClose: false });
   };
 
   if (!salon) return <div className="p-10">Loading...</div>;
@@ -74,11 +125,10 @@ export default function SalonDetails() {
   return (
     <div className="p-8 bg-[#F6F3EF] min-h-screen">
 
-      {/* TITLE */}
       <h1 className="text-3xl font-semibold mb-6">Salon</h1>
 
       {/* TOP CARD */}
-      <div className="bg-white rounded-2xl p-6 flex gap-6 items-center shadow-sm">
+      <div className="bg-white rounded-2xl p-6 flex gap-6 items-center">
 
         {/* PREVIEW */}
         <div className="w-[320px] h-[200px] bg-[#c7a883] rounded-2xl flex items-center justify-center relative">
@@ -88,26 +138,25 @@ export default function SalonDetails() {
 
           <ExternalLink
             className="absolute top-3 right-3 cursor-pointer"
-            onClick={() => window.open(`https://${salon.website}`, "_blank")}
+            onClick={() =>
+              window.open(`https://${salon.website}`, "_blank")
+            }
           />
         </div>
 
         {/* INFO */}
-        <div className="flex-1 space-y-3">
+        <div className="flex-1 space-y-4">
 
-          <div className="flex justify-between items-start">
+          {/* NAME + TOGGLE */}
+          <div className="flex justify-between">
             <div>
               <p className="text-gray-400 text-sm">Salon Name</p>
-              <h2 className="text-lg font-medium">{salon.name}</h2>
+              <p>{salon.name}</p>
             </div>
 
-            {/* STATUS TOGGLE */}
+            {/* ✅ SWITCH FIXED */}
             <div
-              onClick={() =>
-                updateStatus(
-                  salon.status === "Active" ? "Suspended" : "Active"
-                )
-              }
+              onClick={toggleSuspend}
               className={`w-12 h-6 rounded-full cursor-pointer ${
                 salon.status === "Active"
                   ? "bg-green-400"
@@ -119,11 +168,10 @@ export default function SalonDetails() {
           {/* DOMAIN */}
           <div>
             <p className="text-gray-400 text-sm">Domain</p>
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2 items-center">
               {salon.website}
               <ExternalLink
                 size={14}
-                className="cursor-pointer"
                 onClick={() =>
                   window.open(`https://${salon.website}`, "_blank")
                 }
@@ -132,134 +180,142 @@ export default function SalonDetails() {
           </div>
 
           {/* SUBSCRIPTION */}
-          <p>
-            <span className="text-gray-400">Subscription</span> <br />
-            {salon.subscription}
-          </p>
+          <div>
+            <p className="text-gray-400 text-sm">Subscription</p>
+            <p>{salon.subscription}</p>
+          </div>
 
           {/* STATUS */}
-          <p>
-            <span className="text-gray-400">Status</span> <br />
-            <span className="text-green-500">● {salon.status}</span>
-          </p>
+          <div>
+            <p className="text-gray-400 text-sm">Status</p>
+            <p className="text-green-500">● {salon.status}</p>
+          </div>
 
           {/* DATES */}
           <div className="flex gap-10">
-            <p>
-              <span className="text-gray-400">Created</span> <br />
-              {salon.created}
-            </p>
-            <p>
-              <span className="text-gray-400">Expires</span> <br />
-              {salon.expires}
-            </p>
+            <div>
+              <p className="text-gray-400 text-sm">Created</p>
+              <p>{salon.created}</p>
+            </div>
+
+            <div>
+              <p className="text-gray-400 text-sm">Expires</p>
+              <p>{salon.expires}</p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* ACTION BUTTONS */}
-      <div className="flex gap-4 bg-[#E8E1D9] p-4 rounded-2xl mt-6 text-center align-middle justify-center">
+      <div className="flex bg-[#E8E1D9] p-4 rounded-2xl mt-6 justify-center gap-8">
 
+        {/* ✅ DEACTIVATE WITH POPUP */}
         <button
-          onClick={() => updateStatus("Expired")}
+          onClick={confirmDeactivate}
           className="bg-[#BFA59A] px-6 py-2 rounded-xl text-white"
         >
           Deactivate
         </button>
 
+        {/* ✅ RENEW */}
         <button
-          onClick={() => updateStatus("Active")}
+          onClick={openRenewPopup}
           className="bg-[#BFA59A] px-6 py-2 rounded-xl text-white"
         >
           Renew
         </button>
 
+        {/* ✅ TOGGLE BUTTON */}
         <button
-          onClick={() => updateStatus("Suspended")}
-          className="bg-[#C79A3B] px-6 py-2 rounded-xl text-white"
+          onClick={toggleSuspend}
+          className={`px-6 py-2 rounded-xl text-white ${
+            salon.status === "Active"
+              ? "bg-[#C79A3B]"
+              : "bg-green-500"
+          }`}
         >
-          Suspend
+          {salon.status === "Active" ? "Suspend" : "Activate"}
         </button>
 
+        {/* DELETE */}
         <button
           onClick={confirmDelete}
-          className="bg-orange-500 px-6 py-2 rounded-xl text-white flex items-center gap-2"
+          className="bg-orange-500 px-6 py-2 rounded-xl text-white flex gap-2"
         >
           <Trash2 size={16} /> Delete
         </button>
       </div>
 
-      {/* BOTTOM */}
+      {/* CLIENT */}
       <div className="grid grid-cols-2 gap-6 mt-6">
 
-        {/* CLIENT INFO */}
-       <div className="bg-white p-6 rounded-2xl">
-  <h2 className="text-xl font-semibold mb-6">Client Information</h2>
+        <div className="bg-white p-6 rounded-2xl">
+          <h2 className="text-xl font-semibold mb-6">Client Information</h2>
 
-  <div className="space-y-5">
+          {salon.client ? (
+            <div className="space-y-5">
+              <div>
+                <p className="text-gray-400 text-sm">Email</p>
+                <p>{salon.client.email}</p>
+              </div>
 
-    {/* EMAIL */}
-    <div>
-      <p className="text-gray-400 text-sm">Email</p>
-      <p>{salon.owner}@email.com</p>
-    </div>
+              <div className="flex gap-10">
+                <div>
+                  <p className="text-gray-400 text-sm">First Name</p>
+                  <p>{salon.client.first_name}</p>
+                </div>
 
-    {/* NAME */}
-    <div className="flex gap-10">
-      <div>
-        <p className="text-gray-400 text-sm">First Name</p>
-        <p>{salon.owner}</p>
-      </div>
+                <div>
+                  <p className="text-gray-400 text-sm">Last Name</p>
+                  <p>{salon.client.last_name}</p>
+                </div>
+              </div>
 
-      <div>
-        <p className="text-gray-400 text-sm">Last Name</p>
-        <p>-</p>
-      </div>
-    </div>
+              <div className="flex gap-10">
+                <div>
+                  <p className="text-gray-400 text-sm">Payment Method</p>
+                  <p>{salon.client.payment_method}</p>
+                </div>
 
-    {/* PAYMENT */}
-    <div className="flex gap-10">
-      <div>
-        <p className="text-gray-400 text-sm">Payment Method</p>
-        <p className="flex items-center gap-2">
-          <img src="/mastercard.png" className="w-5" />
-          Master Card
-        </p>
-      </div>
+                <div>
+                  <p className="text-gray-400 text-sm">Currency</p>
+                  <p>{salon.client.currency}</p>
+                </div>
+              </div>
 
-      <div>
-        <p className="text-gray-400 text-sm">Currency</p>
-        <p>EGP - Egyptian Pound</p>
-      </div>
-    </div>
+              <div className="flex gap-10">
+                <div>
+                  <p className="text-gray-400 text-sm">Phone</p>
+                  <p>{salon.client.phone}</p>
+                </div>
 
-    {/* PHONE + LOCATION */}
-    <div className="flex gap-10">
-      <div>
-        <p className="text-gray-400 text-sm">Phone</p>
-        <p>+201234567891</p>
-      </div>
-
-      <div>
-        <p className="text-gray-400 text-sm">Location</p>
-        <p>{salon.location}</p>
-      </div>
-    </div>
-
-  </div>
-</div>
+                <div>
+                  <p className="text-gray-400 text-sm">Location</p>
+                  <p>{salon.client.location}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p>No client data</p>
+          )}
+        </div>
 
         {/* ACTIVITY */}
         <div className="bg-white p-6 rounded-2xl">
           <h2 className="text-xl mb-4">Activity</h2>
 
-          {salon.activities?.map((a) => (
-            <div key={a.id} className="mb-4">
-              <p className="text-green-600">● {a.title}</p>
-              <p className="text-gray-500">{a.date}</p>
-            </div>
-          ))}
+          {salon.activities?.length > 0 ? (
+            salon.activities.map((a) => (
+              <div key={a.id} className="mb-4">
+                <p className="text-green-600">● {a.title}</p>
+                <p className="text-gray-500">{a.date}</p>
+              </div>
+            ))
+          ) : (
+            <p>No activity yet</p>
+          )}
         </div>
+
       </div>
     </div>
   );

@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: salon_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    command: >
+      sh -c "
+      while ! nc -z db 5432; do sleep 1; done;
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000
+      "
+    ports:
+      - "8001:8000"   # ✅ CORRECT PLACE
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
